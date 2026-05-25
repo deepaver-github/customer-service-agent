@@ -1,41 +1,35 @@
 from __future__ import annotations
 
-from app.tools.registry import register_tool
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
-MOCK_ORDERS = {
-    "ORD-1234": {
-        "order_id": "ORD-1234",
-        "customer_email": "jane@example.com",
-        "status": "shipped",
-        "items": [{"name": "Wireless Headphones", "qty": 1, "price": 79.99}],
-        "tracking_number": "1Z999AA10123456784",
-        "estimated_delivery": "2026-05-28",
-    },
-    "ORD-5678": {
-        "order_id": "ORD-5678",
-        "customer_email": "john@example.com",
-        "status": "processing",
-        "items": [
-            {"name": "USB-C Cable", "qty": 2, "price": 12.99},
-            {"name": "Phone Case", "qty": 1, "price": 24.99},
-        ],
-        "tracking_number": None,
-        "estimated_delivery": "2026-06-02",
-    },
-}
+from app.memory.models import Order
+from app.tools.registry import register_tool
 
 
 @register_tool(
     name="lookup_order",
     description="Look up an order by order ID or customer email address. Returns order details including status, items, and tracking information.",
 )
-def lookup_order(order_id: str | None = None, email: str | None = None) -> dict:
-    if order_id and order_id in MOCK_ORDERS:
-        return MOCK_ORDERS[order_id]
+async def lookup_order(db: AsyncSession, order_id: str | None = None, email: str | None = None) -> dict:
+    if order_id:
+        stmt = select(Order).where(Order.order_id == order_id)
+    elif email:
+        stmt = select(Order).where(Order.customer_email == email)
+    else:
+        return {"error": "Please provide an order_id or email"}
 
-    if email:
-        for order in MOCK_ORDERS.values():
-            if order["customer_email"] == email:
-                return order
+    result = await db.execute(stmt)
+    order = result.scalar_one_or_none()
 
-    return {"error": "Order not found", "searched_by": {"order_id": order_id, "email": email}}
+    if order is None:
+        return {"error": "Order not found"}
+
+    return {
+        "order_id": order.order_id,
+        "customer_email": order.customer_email,
+        "status": order.status.value,
+        "items": order.items,
+        "tracking_number": order.tracking_number,
+        "estimated_delivery": str(order.estimated_delivery) if order.estimated_delivery else None,
+    }

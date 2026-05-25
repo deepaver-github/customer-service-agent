@@ -114,7 +114,7 @@ class AgentService:
                             })
                         else:
                             tools_used.append(block.name)
-                            result = await execute_tool(block.name, block.input)
+                            result = await execute_tool(block.name, block.input, db=db)
                             tool_results.append({
                                 "type": "tool_result",
                                 "tool_use_id": block.id,

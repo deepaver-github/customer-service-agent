@@ -30,7 +30,11 @@ class ToolEntry:
         properties = {}
         required = []
 
+        SKIP_PARAMS = {"db", "session"}
+
         for param_name, param in sig.parameters.items():
+            if param_name in SKIP_PARAMS:
+                continue
             param_type = hints.get(param_name, str)
             base_type = param_type
             is_optional = False
