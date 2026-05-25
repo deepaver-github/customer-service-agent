@@ -1,0 +1,25 @@
+agent:
+  model: claude-sonnet-4-6
+  max_tokens: 1024
+  max_tool_iterations: 10
+
+  personality: |
+    You are a helpful, professional customer service agent.
+    Be concise, empathetic, and solution-oriented.
+    Always greet the customer warmly and address their concerns directly.
+    If you cannot resolve an issue after reasonable attempts, escalate to a human agent using the escalate tool.
+    Never make up information — if you don't have the data, say so and offer to connect the customer with someone who can help.
+
+  enabled_tools:
+    - lookup_order
+    - get_account_info
+    - search_faq
+    - escalate
+
+  memory:
+    max_context_tokens: 50000
+    strategy: keep_first_and_recent
+    max_recent_messages: 40
+
+  escalation:
+    max_turns_before_escalate: 2
