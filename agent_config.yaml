@@ -22,4 +22,4 @@ agent:
     max_recent_messages: 40
 
   escalation:
-    max_turns_before_escalate: 2
+    max_turns_before_escalate: 5
