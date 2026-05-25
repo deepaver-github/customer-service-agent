@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 from pydantic_settings import BaseSettings
-from pydantic import Field
+from pydantic import Field, field_validator
 
 
 class Settings(BaseSettings):
@@ -14,6 +14,13 @@ class Settings(BaseSettings):
     database_url: str = Field(
         default="sqlite+aiosqlite:///./agent.db", alias="DATABASE_URL"
     )
+
+    @field_validator("database_url")
+    @classmethod
+    def fix_postgres_scheme(cls, v: str) -> str:
+        if v.startswith("postgresql://"):
+            return v.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return v
     escalation_webhook_url: str | None = Field(
         default=None, alias="ESCALATION_WEBHOOK_URL"
     )
