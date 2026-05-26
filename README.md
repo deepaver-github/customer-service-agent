@@ -1,13 +1,13 @@
 # Customer Service AI Agent
 
-A general-purpose customer service AI agent powered by Claude (Anthropic). Built with Python, FastAPI, and SQLite.
+A general-purpose customer service AI agent powered by Claude (Anthropic). Built with Python, FastAPI, and PostgreSQL.
 
 ## Features
 
 - **Multi-turn conversations** with persistent session memory
 - **Tool calling** — the agent can look up orders, check accounts, search FAQs
 - **Human escalation** — detects when to hand off to a human agent via webhook
-- **Streaming** — Server-Sent Events (SSE) support for real-time responses
+- **Token-by-token streaming** — real-time SSE responses using Claude's streaming API
 - **Configurable** — customize personality, tools, and escalation rules via YAML
 
 ## Quick Start
@@ -40,7 +40,16 @@ ANTHROPIC_API_KEY=sk-ant-your-key-here
 uvicorn app.main:app --reload
 ```
 
-The server starts at `http://localhost:8000`. API docs at `http://localhost:8000/docs`.
+The server starts at `http://localhost:8001`. API docs at `http://localhost:8001/docs`.
+
+> **Note:** Port 8000 is blocked on some machines; this project defaults to port 8001.
+
+### Prerequisites
+
+- **PostgreSQL** — run via Docker:
+  ```bash
+  docker compose up -d
+  ```
 
 ## API Endpoints
 
@@ -56,7 +65,7 @@ The server starts at `http://localhost:8000`. API docs at `http://localhost:8000
 ### Example: Chat
 
 ```bash
-curl -X POST http://localhost:8000/chat \
+curl -X POST http://localhost:8001/chat \
   -H "Content-Type: application/json" \
   -d '{"message": "Where is my order ORD-1234?"}'
 ```
@@ -75,7 +84,7 @@ Response:
 ### Example: Continue a conversation
 
 ```bash
-curl -X POST http://localhost:8000/chat \
+curl -X POST http://localhost:8001/chat \
   -H "Content-Type: application/json" \
   -d '{"session_id": "uuid-from-above", "message": "When will it arrive?"}'
 ```
@@ -124,7 +133,7 @@ app/
   api/routes/          # REST endpoints
   agent/               # Claude integration and orchestration
   tools/               # Pluggable tool system
-  memory/              # SQLite conversation persistence
+  memory/              # PostgreSQL conversation persistence
   escalation/          # Human handoff logic
 tests/                 # Test suite
 agent_config.yaml      # Agent behavior configuration

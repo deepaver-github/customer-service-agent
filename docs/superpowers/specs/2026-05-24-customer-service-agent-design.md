@@ -6,13 +6,14 @@ Build a general-purpose customer service AI agent as a REST API service. The age
 
 ## Tech Stack
 
-- **Language:** Python 3.11+
+- **Language:** Python 3.10+
 - **Framework:** FastAPI (async)
-- **LLM:** Claude via Anthropic Python SDK (`anthropic`)
-- **Database:** SQLite via SQLAlchemy (async) + Alembic for migrations
+- **LLM:** Claude via Anthropic Python SDK (`anthropic`, model: `claude-sonnet-4-6`)
+- **Database:** PostgreSQL via SQLAlchemy (async) + asyncpg (SQLite/aiosqlite for tests)
 - **Config:** Pydantic BaseSettings (`.env`) + `agent_config.yaml` for agent behavior
 - **Testing:** pytest + pytest-asyncio
 - **Logging:** structlog (structured JSON logging)
+- **Build:** hatchling via pyproject.toml
 
 ## Architecture
 
@@ -48,7 +49,7 @@ customer-service-agent/
 │   │   ├── __init__.py
 │   │   ├── models.py            # SQLAlchemy models
 │   │   ├── repository.py        # DB operations
-│   │   └── database.py          # SQLite engine/session management
+│   │   └── database.py          # Async engine/session management (PostgreSQL)
 │   └── escalation/
 │       ├── __init__.py
 │       └── handler.py           # Escalation detection + webhook
@@ -76,9 +77,11 @@ customer-service-agent/
 
 The central orchestrator. For each user message:
 
-1. Load conversation history from SQLite for the given session
+1. Load conversation history from PostgreSQL for the given session
 2. Build the messages array: system prompt + history + new user message
-3. Call `anthropic.messages.create()` with the tools list
+3. Call Claude API with the tools list:
+   - **Non-streaming (`/chat`):** `client.messages.create()` — returns complete response
+   - **Streaming (`/chat/stream`):** `client.messages.stream()` — yields token-by-token SSE events
 4. Enter a tool-use loop:
    - If Claude returns `tool_use` blocks → execute each via `tool_executor` → send results back → call Claude again
    - If Claude returns a text response → exit loop
@@ -212,14 +215,24 @@ If no webhook URL is configured, escalation is logged only (graceful degradation
 }
 ```
 
-**Streaming:** `POST /chat/stream` returns Server-Sent Events (SSE) with incremental text chunks.
+**Streaming:** `POST /chat/stream` returns Server-Sent Events (SSE) with true token-by-token streaming via `client.messages.stream()`. Events emitted:
+
+| Event | When | Data |
+|-------|------|------|
+| `stream_start` | Once at start | `{"session_id": "..."}` |
+| `text_delta` | Each text chunk from Claude | `{"delta": "Hello"}` |
+| `tool_start` | Claude begins a tool call | `{"tool_name": "...", "tool_use_id": "..."}` |
+| `tool_result` | After tool execution | `{"tool_name": "...", "tool_use_id": "...", "result": {...}}` |
+| `escalation` | Escalation triggered | `{"reason": "..."}` |
+| `error` | On failure | `{"error": "message"}` |
+| `done` | Stream complete | `{"response": "full text", "session_id": "...", "escalated": false, "tools_used": [...]}` |
 
 ## Configuration
 
 **`.env` (secrets and infrastructure):**
 ```
 ANTHROPIC_API_KEY=sk-ant-...
-DATABASE_URL=sqlite+aiosqlite:///./agent.db
+DATABASE_URL=postgresql+asyncpg://agent:agent@localhost:5432/customer_service
 ESCALATION_WEBHOOK_URL=https://...
 LOG_LEVEL=INFO
 ```
@@ -267,12 +280,13 @@ agent:
 
 ## Verification Plan
 
-1. Start the FastAPI server with `uvicorn app.main:app --reload`
-2. Create a session via `POST /sessions`
-3. Send messages via `POST /chat` and verify:
+1. Start PostgreSQL via `docker compose up -d`
+2. Start the FastAPI server with `uvicorn app.main:app --reload --port 8001`
+3. Create a session via `POST /sessions`
+4. Send messages via `POST /chat` and verify:
    - Multi-turn conversation works (context is maintained)
    - Tool calls are executed and results appear in responses
    - Escalation triggers correctly on explicit request
-4. Check SQLite database for persisted sessions and messages
-5. Run `pytest` and verify all tests pass
-6. Test streaming endpoint via `POST /chat/stream` with an SSE client
+5. Check PostgreSQL database for persisted sessions and messages
+6. Run `pytest` and verify all tests pass
+7. Test streaming endpoint via `POST /chat/stream` — verify token-by-token text delivery, tool_start/tool_result events, and escalation flow

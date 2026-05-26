@@ -84,3 +84,32 @@ class TestChatAPI:
             assert data["escalated"] is False
         finally:
             app.dependency_overrides.clear()
+
+    async def test_chat_stream_endpoint(self):
+        from app.api.dependencies import get_agent_service
+
+        async def fake_stream(db, message, session_id=None):
+            yield {"event": "stream_start", "data": {"session_id": "test-session"}}
+            yield {"event": "text_delta", "data": {"delta": "Hello"}}
+            yield {"event": "done", "data": {"response": "Hello", "session_id": "test-session", "escalated": False, "tools_used": []}}
+
+        mock_service = AsyncMock()
+        mock_service.process_message_stream = fake_stream
+
+        app.dependency_overrides[get_agent_service] = lambda: mock_service
+
+        try:
+            transport = ASGITransport(app=app)
+            async with AsyncClient(transport=transport, base_url="http://test") as client:
+                response = await client.post(
+                    "/chat/stream",
+                    json={"message": "Hi"},
+                )
+
+            assert response.status_code == 200
+            body = response.text
+            assert "stream_start" in body
+            assert "text_delta" in body
+            assert "done" in body
+        finally:
+            app.dependency_overrides.clear()

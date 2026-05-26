@@ -217,6 +217,7 @@
 
     <div class="typing-indicator" id="typing">
         <span></span><span></span><span></span>
+        <span class="typing-label" style="margin-left:8px;animation:none"></span>
     </div>
 
     <div id="input-area">
@@ -292,40 +293,97 @@
             typing.style.display = 'block';
             chatContainer.scrollTop = chatContainer.scrollHeight;
 
+            const msgDiv = document.createElement('div');
+            msgDiv.className = 'message assistant';
+            chatContainer.appendChild(msgDiv);
+            let rawText = '';
             let escalated = false;
+            let currentEvent = null;
 
             try {
                 const body = { message };
                 if (sessionId) body.session_id = sessionId;
 
-                const response = await fetch('/chat', {
+                const response = await fetch('/chat/stream', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(body),
                 });
 
-                const data = await response.json();
-
                 if (!response.ok) {
-                    addMessage('system', `Error: ${data.detail || 'Something went wrong'}`);
+                    msgDiv.remove();
+                    addMessage('system', `Error: ${response.statusText}`);
                     return;
                 }
 
-                sessionId = data.session_id;
-                sessionInfo.textContent = `Session: ${sessionId.substring(0, 8)}...`;
+                typing.style.display = 'none';
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
 
-                addMessage('assistant', data.response, data.tools_used);
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
 
-                if (data.escalated) {
-                    escalated = true;
-                    statusBadge.textContent = 'Escalated';
-                    statusBadge.className = 'status-badge escalated';
-                    addMessage('system', 'This conversation has been escalated to a human agent.');
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop();
+
+                    for (const line of lines) {
+                        if (line.startsWith('event:')) {
+                            currentEvent = line.slice(6).trim();
+                        } else if (line.startsWith('data:') && currentEvent) {
+                            const data = JSON.parse(line.slice(5).trim());
+
+                            if (currentEvent === 'stream_start') {
+                                sessionId = data.session_id;
+                                sessionInfo.textContent = `Session: ${sessionId.substring(0, 8)}...`;
+                            } else if (currentEvent === 'text_delta') {
+                                rawText += data.delta;
+                                msgDiv.innerHTML = formatMarkdown(rawText);
+                                chatContainer.scrollTop = chatContainer.scrollHeight;
+                            } else if (currentEvent === 'tool_start') {
+                                typing.style.display = 'block';
+                                typing.querySelector('.typing-label').textContent = `Using ${data.tool_name}...`;
+                            } else if (currentEvent === 'tool_result') {
+                                typing.style.display = 'none';
+                                typing.querySelector('.typing-label').textContent = '';
+                            } else if (currentEvent === 'escalation') {
+                                escalated = true;
+                                statusBadge.textContent = 'Escalated';
+                                statusBadge.className = 'status-badge escalated';
+                            } else if (currentEvent === 'done') {
+                                if (data.tools_used && data.tools_used.length > 0) {
+                                    const toolsDiv = document.createElement('div');
+                                    toolsDiv.className = 'tools-used';
+                                    data.tools_used.forEach(tool => {
+                                        const span = document.createElement('span');
+                                        span.textContent = tool;
+                                        toolsDiv.appendChild(span);
+                                    });
+                                    msgDiv.appendChild(toolsDiv);
+                                }
+                                if (data.escalated) {
+                                    addMessage('system', 'This conversation has been escalated to a human agent.');
+                                }
+                            } else if (currentEvent === 'error') {
+                                msgDiv.remove();
+                                addMessage('system', `Error: ${data.error}`);
+                            }
+                            currentEvent = null;
+                        }
+                    }
+                }
+
+                if (!rawText && msgDiv.parentNode) {
+                    msgDiv.remove();
                 }
             } catch (err) {
+                if (msgDiv.parentNode) msgDiv.remove();
                 addMessage('system', `Connection error: ${err.message}`);
             } finally {
                 typing.style.display = 'none';
+                typing.querySelector('.typing-label').textContent = '';
                 if (!escalated) {
                     messageInput.disabled = false;
                     sendBtn.disabled = false;

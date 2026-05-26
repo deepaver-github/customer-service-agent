@@ -9,9 +9,9 @@ A general-purpose customer service AI agent built as a REST API. It uses Claude 
 - **Language:** Python 3.10+
 - **Framework:** FastAPI (async)
 - **LLM:** Claude via Anthropic Python SDK (`anthropic`, model: `claude-sonnet-4-6`)
-- **Database:** SQLite via SQLAlchemy (async) + aiosqlite
+- **Database:** PostgreSQL via SQLAlchemy (async) + asyncpg (SQLite/aiosqlite used in tests)
 - **Config:** Pydantic BaseSettings (`.env`) + `agent_config.yaml` for agent behavior
-- **Testing:** pytest + pytest-asyncio (33 tests, all passing)
+- **Testing:** pytest + pytest-asyncio (38 tests, all passing)
 - **Logging:** structlog (structured JSON)
 - **Build:** hatchling via pyproject.toml
 
@@ -30,7 +30,7 @@ app/
       chat.py          # POST /chat, POST /chat/stream (SSE)
       sessions.py      # Session CRUD
   agent/
-    service.py         # Core agent — orchestrates Claude API calls + tool-use loop
+    service.py         # Core agent — orchestrates Claude API calls + tool-use loop (streaming + non-streaming)
     prompt.py          # System prompt builder from YAML config
     tool_executor.py   # Dispatches tool calls, handles errors
   tools/
@@ -70,7 +70,7 @@ tests/
 - **No LangChain** — uses Claude's native tool-use API directly. Simpler, easier to debug.
 - **Decorator-based tool registration** — `@register_tool` auto-converts type hints to JSON Schema for Claude.
 - **Escalation as a tool** — the `escalate` tool is registered like any other tool; Claude calls it when escalation is warranted. Cleaner than parsing JSON from text responses.
-- **SQLite for simplicity** — tables auto-created on startup via `Base.metadata.create_all`. No Alembic migrations set up yet (can add later).
+- **PostgreSQL** — tables auto-created on startup via `Base.metadata.create_all`. Run via Docker Compose. No Alembic migrations set up yet (can add later). Tests use in-memory SQLite.
 - **Context window management** — keeps last N messages (configurable `max_recent_messages` in YAML).
 - **Single deployment** — not multi-tenant.
 
@@ -82,6 +82,9 @@ tests/
 ## Running
 
 ```bash
+# Start PostgreSQL
+docker compose up -d
+
 # Activate venv
 .venv\Scripts\activate
 
@@ -108,7 +111,6 @@ Full design document at: `docs/superpowers/specs/2026-05-24-customer-service-age
 ## What's Not Done Yet
 
 - Alembic migrations (tables are auto-created for now)
-- True token-by-token streaming (current SSE returns complete response)
 - Authentication/authorization on API endpoints
 - Rate limiting
-- Production deployment config (Docker, etc.)
+- Production deployment config
