@@ -16,7 +16,7 @@ import {
     <div class="bg-surface px-7 pb-6 pt-4 md:px-7">
       <div class="mx-auto flex max-w-thread items-end gap-2 rounded-composer border border-ink-200
                   bg-white py-2 pl-[18px] pr-2 shadow-composer transition focus-within:border-accent
-                  focus-within:shadow-[0_0_0_4px_rgba(99,102,241,0.18),0_4px_12px_rgba(24,24,27,0.06)]">
+                  focus-within:shadow-[0_0_0_4px_rgba(30,126,45,0.18),0_4px_12px_rgba(24,24,27,0.06)]">
         <textarea
           #ta
           [value]="value()"
@@ -63,7 +63,7 @@ import {
         Press <kbd class="rounded border border-ink-200 bg-ink-100 px-1.5 py-px font-mono text-[10.5px] text-ink-700">Enter</kbd> to send ·
         <kbd class="rounded border border-ink-200 bg-ink-100 px-1.5 py-px font-mono text-[10.5px] text-ink-700">Shift</kbd>
         + <kbd class="rounded border border-ink-200 bg-ink-100 px-1.5 py-px font-mono text-[10.5px] text-ink-700">Enter</kbd> for newline ·
-        Aria can make mistakes — verify important info
+        Your Care Assistant can make mistakes — verify important info
       </div>
     </div>
   `,
@@ -71,7 +71,7 @@ import {
 })
 export class MessageComposerComponent {
   disabled = input<boolean>(false);
-  placeholder = input<string>('Reply to Aria…');
+  placeholder = input<string>('Message Special Care Australia…');
   send = output<string>();
 
   protected value = signal<string>('');

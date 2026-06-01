@@ -15,14 +15,14 @@ interface Group {
     <aside class="hidden h-full w-[280px] flex-shrink-0 flex-col border-r border-ink-200
                   bg-surface-sidebar md:flex">
       <div class="flex items-center gap-2.5 px-[18px] pb-3.5 pt-5">
-        <div class="flex h-[30px] w-[30px] items-center justify-center rounded-lg
-                    bg-gradient-to-br from-accent to-indigo-400 font-display text-[15px]
-                    font-bold text-white shadow-soft">
-          A
-        </div>
-        <div>
-          <div class="font-display text-base font-semibold leading-tight tracking-tight">Aria</div>
-          <div class="mt-px text-[11px] uppercase tracking-wider text-ink-500">Customer Support</div>
+        <img src="favicon.png" alt="Special Care Australia"
+             class="h-9 w-9 flex-shrink-0 object-contain" />
+        <div class="min-w-0">
+          <div class="overflow-hidden text-ellipsis whitespace-nowrap font-display text-[15px]
+                      font-semibold leading-tight tracking-tight text-brand-green">
+            Special Care Australia
+          </div>
+          <div class="mt-px text-[11px] uppercase tracking-wider text-ink-500">NDIS Support</div>
         </div>
       </div>
 

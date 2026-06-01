@@ -28,12 +28,9 @@ import { ToolCardComponent } from '../tool-card/tool-card';
       @case ('assistant') {
         <div class="flex flex-col gap-1.5">
           <div class="flex items-center gap-2 text-xs text-ink-500">
-            <div class="flex h-[22px] w-[22px] flex-shrink-0 items-center justify-center
-                        rounded-md bg-gradient-to-br from-accent to-indigo-400
-                        font-display text-[10px] font-bold text-white">
-              A
-            </div>
-            <span class="font-semibold text-ink-700">Aria</span>
+            <img src="favicon.png" alt=""
+                 class="h-[22px] w-[22px] flex-shrink-0 object-contain" />
+            <span class="font-semibold text-ink-700">Care Assistant</span>
             <span class="text-ink-400">· {{ time() }}</span>
           </div>
           @for (call of toolCalls(); track call.id) {
@@ -62,7 +59,7 @@ import { ToolCardComponent } from '../tool-card/tool-card';
           </svg>
           <div>
             <strong class="block font-semibold">This conversation has been escalated</strong>
-            A senior support specialist will join shortly. Aria stays connected and can keep helping in the meantime.
+            A Special Care Australia team member will join shortly. I'll stay connected and can keep helping in the meantime.
           </div>
         </div>
       }
