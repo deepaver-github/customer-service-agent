@@ -40,7 +40,7 @@ def agent_config():
         "max_tokens": 1024,
         "max_tool_iterations": 10,
         "personality": "You are a helpful test agent.",
-        "enabled_tools": ["lookup_order", "get_account_info", "search_faq", "escalate"],
+        "enabled_tools": ["lookup_participant", "get_contacts", "search_knowledge", "escalate"],
         "memory": {"max_context_tokens": 50000, "max_recent_messages": 40},
         "escalation": {"max_turns_before_escalate": 5},
     }

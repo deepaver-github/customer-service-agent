@@ -28,10 +28,10 @@ class TestAgentService:
 
     async def test_tool_use_flow(self, db, agent_config, mock_anthropic_client):
         tool_response = make_tool_use_response(
-            "lookup_order", {"order_id": "ORD-1234"}
+            "lookup_participant", {"ndis_number": "430112233"}
         )
         text_response = make_text_response(
-            "Your order ORD-1234 has been shipped!"
+            "I could not find an active participant matching that NDIS number."
         )
         mock_anthropic_client.messages.create.side_effect = [
             tool_response,
@@ -39,10 +39,10 @@ class TestAgentService:
         ]
 
         agent = AgentService(client=mock_anthropic_client, agent_config=agent_config)
-        result = await agent.process_message(db, "Where is my order ORD-1234?")
+        result = await agent.process_message(db, "Do you have a participant with NDIS number 430112233?")
 
-        assert "lookup_order" in result.tools_used
-        assert "shipped" in result.response
+        assert "lookup_participant" in result.tools_used
+        assert "participant" in result.response.lower()
         assert mock_anthropic_client.messages.create.call_count == 2
 
     async def test_escalation_flow(self, db, agent_config, mock_anthropic_client):
@@ -114,13 +114,13 @@ class TestAgentServiceStreaming:
         self, db, agent_config, mock_anthropic_client
     ):
         tool_events = make_tool_use_stream_events(
-            "lookup_order", {"order_id": "ORD-1234"}, tool_use_id="tu_456"
+            "lookup_participant", {"ndis_number": "430112233"}, tool_use_id="tu_456"
         )
         tool_final = make_tool_use_response(
-            "lookup_order", {"order_id": "ORD-1234"}, tool_use_id="tu_456"
+            "lookup_participant", {"ndis_number": "430112233"}, tool_use_id="tu_456"
         )
 
-        answer = "Your order ORD-1234 has been shipped!"
+        answer = "I could not find an active participant matching that NDIS number."
         text_events = make_text_stream_events(answer)
         text_final = make_text_response(answer)
 
@@ -133,7 +133,7 @@ class TestAgentServiceStreaming:
         agent = AgentService(client=mock_anthropic_client, agent_config=agent_config)
 
         events = await self._collect_events(
-            agent.process_message_stream(db, "Where is my order ORD-1234?")
+            agent.process_message_stream(db, "Do you have a participant with NDIS number 430112233?")
         )
 
         event_types = [e["event"] for e in events]
@@ -143,10 +143,10 @@ class TestAgentServiceStreaming:
         assert event_types[-1] == "done"
 
         tool_start = next(e for e in events if e["event"] == "tool_start")
-        assert tool_start["data"]["tool_name"] == "lookup_order"
+        assert tool_start["data"]["tool_name"] == "lookup_participant"
 
         done_data = events[-1]["data"]
-        assert "lookup_order" in done_data["tools_used"]
+        assert "lookup_participant" in done_data["tools_used"]
         assert done_data["response"] == answer
 
     async def test_stream_escalation_flow(

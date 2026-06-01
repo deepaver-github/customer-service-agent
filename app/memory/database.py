@@ -27,21 +27,20 @@ END;
 $$ LANGUAGE plpgsql
 """
 
-ORDERS_TRIGGER_SQL = """
-DO $$ BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'orders_audit_trigger') THEN
-        CREATE TRIGGER orders_audit_trigger
-        AFTER INSERT OR UPDATE OR DELETE ON orders
-        FOR EACH ROW EXECUTE FUNCTION audit_trigger_func();
-    END IF;
-END $$
-"""
+AUDITED_TABLES = (
+    "participants",
+    "contacts",
+    "staff",
+    "participant_staff_assignments",
+)
 
-ACCOUNTS_TRIGGER_SQL = """
+
+def _trigger_sql(table: str) -> str:
+    return f"""
 DO $$ BEGIN
-    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'accounts_audit_trigger') THEN
-        CREATE TRIGGER accounts_audit_trigger
-        AFTER INSERT OR UPDATE OR DELETE ON accounts
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = '{table}_audit_trigger') THEN
+        CREATE TRIGGER {table}_audit_trigger
+        AFTER INSERT OR UPDATE OR DELETE ON {table}
         FOR EACH ROW EXECUTE FUNCTION audit_trigger_func();
     END IF;
 END $$
@@ -59,8 +58,8 @@ async def init_db(database_url: str) -> None:
 
         if "postgresql" in database_url:
             await conn.execute(text(AUDIT_FUNCTION_SQL))
-            await conn.execute(text(ORDERS_TRIGGER_SQL))
-            await conn.execute(text(ACCOUNTS_TRIGGER_SQL))
+            for table in AUDITED_TABLES:
+                await conn.execute(text(_trigger_sql(table)))
 
 
 def get_session_factory() -> async_sessionmaker[AsyncSession]:

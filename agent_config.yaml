@@ -30,11 +30,9 @@ agent:
     - If a tool isn't available for what's being asked, say what you can and offer to connect them with the team.
 
   enabled_tools:
-    - lookup_order
-    - get_account_info
-    - search_faq
-    - get_account_history
-    - get_order_history
+    - lookup_participant
+    - get_contacts
+    - search_knowledge
     - escalate
 
   memory:

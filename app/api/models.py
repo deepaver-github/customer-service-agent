@@ -20,6 +20,14 @@ class ChatResponse(BaseModel):
 
 class SessionCreate(BaseModel):
     metadata: dict | None = Field(default=None, description="Optional session metadata")
+    participant_id: str | None = Field(
+        default=None,
+        description="Optional Special Care Australia participant id this session is on behalf of",
+    )
+    staff_id: str | None = Field(
+        default=None,
+        description="Optional staff id if a staff member is using the assistant",
+    )
 
 
 class SessionResponse(BaseModel):
@@ -28,6 +36,8 @@ class SessionResponse(BaseModel):
     created_at: datetime
     updated_at: datetime
     metadata: dict | None = None
+    participant_id: str | None = None
+    staff_id: str | None = None
 
     model_config = {"from_attributes": True}
 

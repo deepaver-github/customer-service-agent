@@ -34,15 +34,15 @@ class TestExtractPreview:
         assert _extract_preview(content) == "Sure, here's your answer."
 
     def test_tool_use_list(self):
-        content = [{"type": "tool_use", "name": "order_lookup", "input": {}}]
-        assert _extract_preview(content) == "[used order_lookup]"
+        content = [{"type": "tool_use", "name": "lookup_participant", "input": {}}]
+        assert _extract_preview(content) == "[used lookup_participant]"
 
     def test_mixed_text_and_tool_use(self):
         content = [
             {"type": "text", "text": "Looking that up."},
-            {"type": "tool_use", "name": "order_lookup"},
+            {"type": "tool_use", "name": "lookup_participant"},
         ]
-        assert _extract_preview(content) == "Looking that up. [used order_lookup]"
+        assert _extract_preview(content) == "Looking that up. [used lookup_participant]"
 
     def test_tool_result_list(self):
         content = [{"type": "tool_result", "tool_use_id": "x", "content": "ok"}]
@@ -127,10 +127,10 @@ class TestListSessions:
             db,
             session.id,
             "assistant",
-            [{"type": "text", "text": "Order shipped."}, {"type": "tool_use", "name": "order_lookup"}],
+            [{"type": "text", "text": "Found participant."}, {"type": "tool_use", "name": "lookup_participant"}],
         )
         items, _ = await repo.list_sessions(db)
-        assert items[0]["last_message_preview"] == "Order shipped. [used order_lookup]"
+        assert items[0]["last_message_preview"] == "Found participant. [used lookup_participant]"
 
     async def test_pagination_round_trip(self, db):
         base = datetime(2026, 5, 31, 10, 0, 0, tzinfo=timezone.utc)

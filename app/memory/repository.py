@@ -9,15 +9,34 @@ from sqlalchemy import and_, func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from app.memory.models import Message, Session, SessionStatus
+from app.memory.models import (
+    Contact,
+    KnowledgeArticle,
+    KnowledgeStatus,
+    Message,
+    Participant,
+    ParticipantStatus,
+    ServiceType,
+    ServiceTypeStatus,
+    Session,
+    SessionStatus,
+    Staff,
+)
 
 PREVIEW_MAX_LEN = 120
 
 
 async def create_session(
-    db: AsyncSession, metadata: dict | None = None
+    db: AsyncSession,
+    metadata: dict | None = None,
+    participant_id: str | None = None,
+    staff_id: str | None = None,
 ) -> Session:
-    session = Session(metadata_=metadata)
+    session = Session(
+        metadata_=metadata,
+        participant_id=participant_id,
+        staff_id=staff_id,
+    )
     db.add(session)
     await db.commit()
     await db.refresh(session)
@@ -206,3 +225,109 @@ async def list_sessions(
     )
 
     return items, next_cursor
+
+
+# ============================================================================
+# Participants
+# ============================================================================
+
+
+async def get_participant_by_ndis_number(
+    db: AsyncSession, ndis_number: str
+) -> Participant | None:
+    stmt = select(Participant).where(
+        Participant.ndis_number == ndis_number,
+        Participant.deleted_at.is_(None),
+    )
+    result = await db.execute(stmt)
+    return result.scalar_one_or_none()
+
+
+async def get_participant(db: AsyncSession, participant_id: str) -> Participant | None:
+    stmt = select(Participant).where(
+        Participant.id == participant_id,
+        Participant.deleted_at.is_(None),
+    )
+    result = await db.execute(stmt)
+    return result.scalar_one_or_none()
+
+
+async def search_participants_by_name(
+    db: AsyncSession, query: str, limit: int = 5
+) -> list[Participant]:
+    pattern = f"%{query.lower()}%"
+    stmt = (
+        select(Participant)
+        .where(Participant.deleted_at.is_(None))
+        .where(
+            or_(
+                func.lower(Participant.first_name).like(pattern),
+                func.lower(Participant.last_name).like(pattern),
+                func.lower(Participant.preferred_name).like(pattern),
+                func.lower(Participant.email).like(pattern),
+            )
+        )
+        .order_by(Participant.last_name, Participant.first_name)
+        .limit(limit)
+    )
+    result = await db.execute(stmt)
+    return list(result.scalars().all())
+
+
+async def get_contacts_for_participant(
+    db: AsyncSession, participant_id: str
+) -> list[Contact]:
+    stmt = (
+        select(Contact)
+        .where(
+            Contact.participant_id == participant_id,
+            Contact.deleted_at.is_(None),
+        )
+        .order_by(Contact.is_primary.desc(), Contact.is_emergency.desc(), Contact.name)
+    )
+    result = await db.execute(stmt)
+    return list(result.scalars().all())
+
+
+# ============================================================================
+# Service catalog
+# ============================================================================
+
+
+async def list_active_service_types(db: AsyncSession) -> list[ServiceType]:
+    stmt = (
+        select(ServiceType)
+        .where(ServiceType.status == ServiceTypeStatus.ACTIVE)
+        .order_by(ServiceType.name)
+    )
+    result = await db.execute(stmt)
+    return list(result.scalars().all())
+
+
+# ============================================================================
+# Knowledge base
+# ============================================================================
+
+
+async def search_knowledge_articles(
+    db: AsyncSession, query: str, limit: int = 5
+) -> list[KnowledgeArticle]:
+    keywords = [k for k in query.lower().split() if k]
+    if not keywords:
+        return []
+
+    conditions = []
+    for kw in keywords:
+        pattern = f"%{kw}%"
+        conditions.append(func.lower(KnowledgeArticle.title).like(pattern))
+        conditions.append(func.lower(KnowledgeArticle.body_md).like(pattern))
+
+    stmt = (
+        select(KnowledgeArticle)
+        .where(KnowledgeArticle.status == KnowledgeStatus.PUBLISHED)
+        .where(or_(*conditions))
+        .order_by(KnowledgeArticle.updated_at.desc())
+        .limit(limit)
+    )
+    result = await db.execute(stmt)
+    return list(result.scalars().all())

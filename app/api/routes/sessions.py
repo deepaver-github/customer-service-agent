@@ -24,13 +24,22 @@ async def create_session(
     db: AsyncSession = Depends(get_db),
 ):
     metadata = request.metadata if request else None
-    session = await repo.create_session(db, metadata=metadata)
+    participant_id = request.participant_id if request else None
+    staff_id = request.staff_id if request else None
+    session = await repo.create_session(
+        db,
+        metadata=metadata,
+        participant_id=participant_id,
+        staff_id=staff_id,
+    )
     return SessionResponse(
         id=session.id,
         status=session.status.value,
         created_at=session.created_at,
         updated_at=session.updated_at,
         metadata=session.metadata_,
+        participant_id=session.participant_id,
+        staff_id=session.staff_id,
     )
 
 
@@ -76,6 +85,8 @@ async def get_session(
         created_at=session.created_at,
         updated_at=session.updated_at,
         metadata=session.metadata_,
+        participant_id=session.participant_id,
+        staff_id=session.staff_id,
         messages=messages,
     )
 
