@@ -1,0 +1,65 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body {
+    height: 100%;
+    overflow: hidden;
+    background: theme('colors.surface');
+    color: theme('colors.ink.900');
+    font-family: theme('fontFamily.sans');
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  button { font: inherit; cursor: pointer; }
+  input, textarea { font: inherit; color: inherit; }
+}
+
+@layer components {
+  /* Scrollbar polish for thread & sidebar */
+  .scroll-polish::-webkit-scrollbar { width: 8px; }
+  .scroll-polish::-webkit-scrollbar-thumb {
+    background: theme('colors.ink.200');
+    border-radius: 8px;
+  }
+  .scroll-polish::-webkit-scrollbar-thumb:hover {
+    background: theme('colors.ink.300');
+  }
+
+  /* Prose styling for assistant markdown output */
+  .prose-msg p { margin-bottom: 0.6em; }
+  .prose-msg p:last-child { margin-bottom: 0; }
+  .prose-msg strong { font-weight: 600; }
+  .prose-msg code {
+    font-family: theme('fontFamily.mono');
+    font-size: 0.88em;
+    background: theme('colors.ink.100');
+    padding: 1px 6px;
+    border-radius: 4px;
+    border: 1px solid theme('colors.ink.200');
+  }
+  .prose-msg ul { margin: 0.5em 0 0.5em 1.4em; list-style: disc; }
+  .prose-msg ol { margin: 0.5em 0 0.5em 1.4em; list-style: decimal; }
+  .prose-msg li { margin-bottom: 0.3em; }
+  .prose-msg a {
+    color: theme('colors.accent.DEFAULT');
+    text-decoration: none;
+    border-bottom: 1px solid theme('colors.accent.soft');
+  }
+  .prose-msg a:hover { border-bottom-color: theme('colors.accent.DEFAULT'); }
+  .prose-msg pre {
+    background: theme('colors.ink.100');
+    border: 1px solid theme('colors.ink.200');
+    border-radius: 6px;
+    padding: 10px 12px;
+    overflow-x: auto;
+    font-family: theme('fontFamily.mono');
+    font-size: 12.5px;
+    line-height: 1.6;
+  }
+}

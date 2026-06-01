@@ -45,6 +45,22 @@ class SessionDetailResponse(SessionResponse):
     messages: list[MessageResponse] = Field(default_factory=list)
 
 
+class SessionListItem(BaseModel):
+    id: str
+    status: str
+    created_at: datetime
+    updated_at: datetime
+    last_message_preview: str | None = None
+    message_count: int = 0
+
+    model_config = {"from_attributes": True}
+
+
+class SessionListResponse(BaseModel):
+    items: list[SessionListItem] = Field(default_factory=list)
+    next_cursor: str | None = None
+
+
 class ErrorResponse(BaseModel):
     error: str
     code: str

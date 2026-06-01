@@ -1,0 +1,1002 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customer Service Agent — Design Mockup</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --surface: #FAFAFA;
+  --surface-sidebar: #F4F4F5;
+  --surface-hover: #ECECEE;
+  --user-tint: #EEF2FF;
+  --user-border: #E0E7FF;
+  --tool-bg: #F4F4F5;
+  --tool-border: #E4E4E7;
+  --escalation-bg: #FEF3C7;
+  --escalation-border: #F59E0B;
+  --escalation-text: #78350F;
+
+  --ink-900: #18181B;
+  --ink-700: #3F3F46;
+  --ink-500: #71717A;
+  --ink-400: #A1A1AA;
+  --ink-300: #D4D4D8;
+  --ink-200: #E4E4E7;
+  --ink-100: #F4F4F5;
+
+  --accent: #6366F1;
+  --accent-hover: #4F46E5;
+  --accent-soft: #E0E7FF;
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
+  --shadow-sm: 0 1px 2px rgba(24, 24, 27, 0.04);
+  --shadow-md: 0 4px 12px rgba(24, 24, 27, 0.06);
+  --shadow-lg: 0 12px 32px rgba(24, 24, 27, 0.08);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--font-sans);
+  color: var(--ink-900);
+  background: var(--surface);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button { font: inherit; cursor: pointer; border: none; background: none; color: inherit; }
+input, textarea { font: inherit; color: inherit; }
+
+/* ---------- App shell ---------- */
+.app {
+  display: flex;
+  height: 100vh;
+  width: 100vw;
+}
+
+/* ---------- Sidebar ---------- */
+.sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  background: var(--surface-sidebar);
+  border-right: 1px solid var(--ink-200);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sidebar-header {
+  padding: 20px 18px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-mark {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, var(--accent) 0%, #818CF8 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 15px;
+  box-shadow: var(--shadow-sm);
+}
+
+.brand-name {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 16px;
+  letter-spacing: -0.01em;
+}
+
+.brand-meta {
+  font-size: 11px;
+  color: var(--ink-500);
+  margin-top: 1px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.sidebar-search {
+  padding: 6px 14px 12px;
+}
+
+.search-box {
+  position: relative;
+}
+
+.search-box input {
+  width: 100%;
+  padding: 8px 10px 8px 32px;
+  background: white;
+  border: 1px solid var(--ink-200);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.search-box input::placeholder { color: var(--ink-400); }
+.search-box input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.search-box svg {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 14px;
+  height: 14px;
+  color: var(--ink-400);
+}
+
+.sidebar-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 8px 8px;
+}
+
+.session-group {
+  margin-top: 10px;
+}
+
+.session-group-label {
+  padding: 8px 10px 4px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ink-500);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.session-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border-radius: var(--radius-md);
+  margin-bottom: 2px;
+  transition: background 0.12s;
+}
+
+.session-item:hover { background: var(--surface-hover); }
+
+.session-item.active {
+  background: var(--accent-soft);
+}
+
+.session-item.active .session-title { color: var(--accent-hover); font-weight: 600; }
+
+.session-title {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--ink-900);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 2px;
+}
+
+.session-preview {
+  font-size: 12px;
+  color: var(--ink-500);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.session-meta {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.session-time {
+  font-size: 11px;
+  color: var(--ink-400);
+}
+
+.session-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.session-badge.escalated {
+  background: var(--escalation-bg);
+  color: var(--escalation-text);
+}
+
+.sidebar-footer {
+  padding: 12px 14px 16px;
+  border-top: 1px solid var(--ink-200);
+}
+
+.btn-new-chat {
+  width: 100%;
+  padding: 10px 14px;
+  background: var(--ink-900);
+  color: white;
+  border-radius: var(--radius-md);
+  font-weight: 500;
+  font-size: 13.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: background 0.15s;
+}
+
+.btn-new-chat:hover { background: var(--accent-hover); }
+.btn-new-chat svg { width: 14px; height: 14px; }
+
+/* ---------- Main column ---------- */
+.main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  background: var(--surface);
+  min-width: 0;
+}
+
+.main-header {
+  padding: 14px 28px;
+  border-bottom: 1px solid var(--ink-200);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(250, 250, 250, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.hamburger {
+  display: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+.hamburger:hover { background: var(--surface-hover); }
+.hamburger svg { width: 18px; height: 18px; }
+
+.main-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: -0.015em;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 100px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.status-pill.active {
+  background: #DCFCE7;
+  color: #14532D;
+}
+
+.status-pill.active::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #16A34A;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.18);
+}
+
+.status-pill.escalated {
+  background: var(--escalation-bg);
+  color: var(--escalation-text);
+}
+
+.status-pill.escalated::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--escalation-border);
+}
+
+.header-icon-btn {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-500);
+}
+.header-icon-btn:hover { background: var(--surface-hover); color: var(--ink-900); }
+.header-icon-btn svg { width: 16px; height: 16px; }
+
+/* ---------- Thread ---------- */
+.thread {
+  flex: 1;
+  overflow-y: auto;
+  padding: 32px 28px 24px;
+  scroll-behavior: smooth;
+}
+
+.thread-inner {
+  max-width: 720px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.turn {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.turn-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--ink-500);
+}
+
+.turn-avatar {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.turn-avatar.user { background: var(--ink-900); }
+.turn-avatar.assistant {
+  background: linear-gradient(135deg, var(--accent) 0%, #818CF8 100%);
+  font-family: var(--font-display);
+}
+
+.turn-name { font-weight: 600; color: var(--ink-700); }
+.turn-time { color: var(--ink-400); }
+
+.turn-content {
+  padding-left: 30px;
+  font-size: 15.5px;
+  line-height: 1.65;
+  color: var(--ink-900);
+}
+
+.turn.user .turn-content {
+  background: var(--user-tint);
+  border: 1px solid var(--user-border);
+  border-radius: var(--radius-lg);
+  padding: 12px 16px;
+  margin-left: 30px;
+  display: inline-block;
+  align-self: flex-start;
+}
+
+.turn-content p { margin-bottom: 0.6em; }
+.turn-content p:last-child { margin-bottom: 0; }
+.turn-content strong { font-weight: 600; }
+.turn-content code {
+  font-family: var(--font-mono);
+  font-size: 0.88em;
+  background: var(--ink-100);
+  padding: 1px 6px;
+  border-radius: 4px;
+  border: 1px solid var(--ink-200);
+}
+.turn-content ul { margin: 0.5em 0 0.5em 1.4em; }
+.turn-content li { margin-bottom: 0.3em; }
+
+.turn-content a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-soft); }
+.turn-content a:hover { border-bottom-color: var(--accent); }
+
+/* ---------- Tool card ---------- */
+.tool-card {
+  margin: 10px 0 14px 30px;
+  border: 1px solid var(--tool-border);
+  border-radius: var(--radius-md);
+  background: white;
+  overflow: hidden;
+  font-size: 13.5px;
+  max-width: 560px;
+}
+
+.tool-header {
+  padding: 9px 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--tool-bg);
+  border-bottom: 1px solid var(--tool-border);
+  cursor: pointer;
+  user-select: none;
+}
+
+.tool-card.collapsed .tool-header { border-bottom: none; }
+
+.tool-status-icon {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #DCFCE7;
+  color: #16A34A;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.tool-status-icon svg { width: 10px; height: 10px; stroke-width: 3; }
+
+.tool-name {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--ink-900);
+}
+
+.tool-label {
+  color: var(--ink-500);
+  font-size: 12.5px;
+}
+
+.tool-chevron {
+  margin-left: auto;
+  color: var(--ink-400);
+  transition: transform 0.18s;
+}
+.tool-chevron svg { width: 14px; height: 14px; }
+.tool-card:not(.collapsed) .tool-chevron { transform: rotate(180deg); }
+
+.tool-body {
+  padding: 12px 14px;
+  background: white;
+}
+
+.tool-body pre {
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ink-700);
+  background: var(--ink-100);
+  padding: 10px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--ink-200);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.tool-key { color: var(--accent-hover); }
+.tool-string { color: #047857; }
+.tool-number { color: #B45309; }
+
+/* tool execution (active) */
+.tool-card.executing .tool-status-icon {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.tool-card.executing .tool-status-icon svg {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ---------- Streaming caret ---------- */
+.caret {
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  background: var(--accent);
+  vertical-align: text-bottom;
+  margin-left: 2px;
+  animation: blink 1s steps(2, start) infinite;
+  border-radius: 1px;
+}
+
+@keyframes blink {
+  to { opacity: 0; }
+}
+
+/* ---------- Escalation banner ---------- */
+.escalation-banner {
+  background: var(--escalation-bg);
+  border: 1px solid var(--escalation-border);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  color: var(--escalation-text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.escalation-banner svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+.escalation-banner strong { display: block; margin-bottom: 2px; font-weight: 600; }
+
+/* ---------- Composer ---------- */
+.composer-wrap {
+  padding: 16px 28px 24px;
+  background: var(--surface);
+}
+
+.composer {
+  max-width: 720px;
+  margin: 0 auto;
+  background: white;
+  border: 1px solid var(--ink-200);
+  border-radius: var(--radius-xl);
+  padding: 8px 8px 8px 18px;
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  box-shadow: var(--shadow-md);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.composer:focus-within {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft), var(--shadow-md);
+}
+
+.composer textarea {
+  flex: 1;
+  border: none;
+  outline: none;
+  resize: none;
+  background: transparent;
+  font-size: 15px;
+  line-height: 1.5;
+  padding: 10px 0;
+  max-height: 160px;
+  font-family: inherit;
+}
+
+.composer textarea::placeholder { color: var(--ink-400); }
+
+.composer-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.composer-icon-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ink-500);
+  transition: background 0.12s, color 0.12s;
+}
+.composer-icon-btn:hover { background: var(--ink-100); color: var(--ink-900); }
+.composer-icon-btn svg { width: 18px; height: 18px; }
+
+.btn-send {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.12s, transform 0.08s;
+  box-shadow: 0 2px 6px rgba(99, 102, 241, 0.35);
+}
+.btn-send:hover { background: var(--accent-hover); transform: translateY(-1px); }
+.btn-send:disabled {
+  background: var(--ink-300);
+  color: white;
+  box-shadow: none;
+  cursor: not-allowed;
+  transform: none;
+}
+.btn-send svg { width: 16px; height: 16px; }
+
+.composer-hint {
+  max-width: 720px;
+  margin: 8px auto 0;
+  font-size: 11.5px;
+  color: var(--ink-400);
+  text-align: center;
+}
+
+.composer-hint kbd {
+  font-family: var(--font-mono);
+  background: var(--ink-100);
+  border: 1px solid var(--ink-200);
+  border-radius: 4px;
+  padding: 1px 5px;
+  font-size: 10.5px;
+  color: var(--ink-700);
+}
+
+/* ---------- Mockup ribbon ---------- */
+.mockup-ribbon {
+  position: fixed;
+  top: 18px;
+  right: -42px;
+  background: var(--accent);
+  color: white;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 5px 50px;
+  transform: rotate(35deg);
+  z-index: 1000;
+  box-shadow: var(--shadow-md);
+  pointer-events: none;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  .sidebar { display: none; }
+  .hamburger { display: flex; }
+  .thread { padding: 24px 18px 16px; }
+  .composer-wrap { padding: 12px 18px 18px; }
+  .main-header { padding: 12px 18px; }
+}
+
+/* ---------- Scrollbar polish ---------- */
+.thread::-webkit-scrollbar,
+.sidebar-list::-webkit-scrollbar { width: 8px; }
+.thread::-webkit-scrollbar-thumb,
+.sidebar-list::-webkit-scrollbar-thumb { background: var(--ink-200); border-radius: 8px; }
+.thread::-webkit-scrollbar-thumb:hover,
+.sidebar-list::-webkit-scrollbar-thumb:hover { background: var(--ink-300); }
+</style>
+</head>
+<body>
+
+<div class="mockup-ribbon">Mockup · Not Interactive</div>
+
+<div class="app">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand-mark">A</div>
+      <div>
+        <div class="brand-name">Aria</div>
+        <div class="brand-meta">Customer Support</div>
+      </div>
+    </div>
+
+    <div class="sidebar-search">
+      <div class="search-box">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Search conversations">
+      </div>
+    </div>
+
+    <div class="sidebar-list">
+
+      <div class="session-group">
+        <div class="session-group-label">Today</div>
+
+        <button class="session-item active">
+          <div class="session-title">Order #42 — shipping</div>
+          <div class="session-preview">Your order #42 shipped on May 28 and is currently in trans…</div>
+          <div class="session-meta">
+            <span class="session-time">Just now</span>
+            <span class="session-badge escalated">Escalated</span>
+          </div>
+        </button>
+
+        <button class="session-item">
+          <div class="session-title">Refund for damaged item</div>
+          <div class="session-preview">I've processed your refund of $42.99 to the card ending …</div>
+          <div class="session-meta">
+            <span class="session-time">2h ago</span>
+          </div>
+        </button>
+
+        <button class="session-item">
+          <div class="session-title">Account email change</div>
+          <div class="session-preview">To update your email address, please verify your identity…</div>
+          <div class="session-meta">
+            <span class="session-time">4h ago</span>
+          </div>
+        </button>
+      </div>
+
+      <div class="session-group">
+        <div class="session-group-label">Yesterday</div>
+
+        <button class="session-item">
+          <div class="session-title">Subscription renewal</div>
+          <div class="session-preview">Your Premium plan auto-renews on June 15. You can manage…</div>
+          <div class="session-meta">
+            <span class="session-time">Yesterday</span>
+          </div>
+        </button>
+
+        <button class="session-item">
+          <div class="session-title">Password reset</div>
+          <div class="session-preview">A reset link has been sent to d***@gmail.com. The link exp…</div>
+          <div class="session-meta">
+            <span class="session-time">Yesterday</span>
+          </div>
+        </button>
+      </div>
+
+      <div class="session-group">
+        <div class="session-group-label">Earlier</div>
+
+        <button class="session-item">
+          <div class="session-title">Shipping address update</div>
+          <div class="session-preview">I've updated your default shipping address to 142 Maple St…</div>
+          <div class="session-meta">
+            <span class="session-time">May 24</span>
+          </div>
+        </button>
+
+        <button class="session-item">
+          <div class="session-title">Promo code question</div>
+          <div class="session-preview">The code WELCOME10 gives you 10% off your next order…</div>
+          <div class="session-meta">
+            <span class="session-time">May 20</span>
+          </div>
+        </button>
+      </div>
+
+    </div>
+
+    <div class="sidebar-footer">
+      <button class="btn-new-chat">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        New conversation
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===================== MAIN ===================== -->
+  <main class="main">
+
+    <div class="main-header">
+      <button class="hamburger" aria-label="Open sidebar">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="main-title">Order #42 — shipping</div>
+      <span class="status-pill escalated">Escalated</span>
+      <button class="header-icon-btn" aria-label="Session options">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><circle cx="12" cy="5" r="1"/><circle cx="12" cy="19" r="1"/></svg>
+      </button>
+    </div>
+
+    <div class="thread" role="log" aria-live="polite">
+      <div class="thread-inner">
+
+        <!-- Turn 1: user -->
+        <div class="turn user">
+          <div class="turn-meta">
+            <div class="turn-avatar user">DV</div>
+            <span class="turn-name">You</span>
+            <span class="turn-time">· 11:42 AM</span>
+          </div>
+          <div class="turn-content">
+            Hi — where is my order <code>#42</code>? It was supposed to arrive yesterday.
+          </div>
+        </div>
+
+        <!-- Turn 2: assistant with collapsed tool card -->
+        <div class="turn assistant">
+          <div class="turn-meta">
+            <div class="turn-avatar assistant">A</div>
+            <span class="turn-name">Aria</span>
+            <span class="turn-time">· 11:42 AM</span>
+          </div>
+
+          <div class="tool-card collapsed">
+            <div class="tool-header">
+              <span class="tool-status-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+              <span class="tool-label">Used</span>
+              <span class="tool-name">order_lookup</span>
+              <span class="tool-chevron">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </span>
+            </div>
+          </div>
+
+          <div class="turn-content">
+            <p>I looked up order <strong>#42</strong>. It shipped on <strong>May 28</strong> via UPS Ground and was last scanned in <strong>Columbus, OH</strong>.</p>
+            <p>Estimated delivery has been pushed to <strong>tomorrow, May 31</strong> due to a weather delay in the Midwest. Here's the tracking:</p>
+            <ul>
+              <li><a href="#">UPS tracking <code>1Z999AA10123456784</code></a></li>
+            </ul>
+          </div>
+        </div>
+
+        <!-- Turn 3: user -->
+        <div class="turn user">
+          <div class="turn-meta">
+            <div class="turn-avatar user">DV</div>
+            <span class="turn-name">You</span>
+            <span class="turn-time">· 11:44 AM</span>
+          </div>
+          <div class="turn-content">
+            That's frustrating. What's your refund policy for late deliveries?
+          </div>
+        </div>
+
+        <!-- Turn 4: assistant with expanded tool card -->
+        <div class="turn assistant">
+          <div class="turn-meta">
+            <div class="turn-avatar assistant">A</div>
+            <span class="turn-name">Aria</span>
+            <span class="turn-time">· 11:44 AM</span>
+          </div>
+
+          <div class="tool-card">
+            <div class="tool-header">
+              <span class="tool-status-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </span>
+              <span class="tool-label">Used</span>
+              <span class="tool-name">faq_search</span>
+              <span class="tool-chevron">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </span>
+            </div>
+            <div class="tool-body">
+<pre>{
+  <span class="tool-key">"query"</span>: <span class="tool-string">"late delivery refund"</span>,
+  <span class="tool-key">"matches"</span>: [
+    {
+      <span class="tool-key">"title"</span>: <span class="tool-string">"Shipping guarantee"</span>,
+      <span class="tool-key">"score"</span>: <span class="tool-number">0.94</span>,
+      <span class="tool-key">"excerpt"</span>: <span class="tool-string">"Orders delayed &gt; 48h qualify for shipping refund."</span>
+    },
+    {
+      <span class="tool-key">"title"</span>: <span class="tool-string">"Compensation policy"</span>,
+      <span class="tool-key">"score"</span>: <span class="tool-number">0.82</span>,
+      <span class="tool-key">"excerpt"</span>: <span class="tool-string">"$10 credit applied automatically after delay."</span>
+    }
+  ]
+}</pre>
+            </div>
+          </div>
+
+          <div class="turn-content">
+            <p>Good news — because your delivery is delayed more than 48 hours, you qualify for two things automatically:</p>
+            <ul>
+              <li>A full <strong>refund of the shipping fee</strong> ($6.99)</li>
+              <li>A <strong>$10 store credit</strong> applied to your account</li>
+            </ul>
+            <p>I'm processing both now. You'll see the shipping refund on your card within 3–5 business days, and the credit is already available on your next order.</p>
+          </div>
+        </div>
+
+        <!-- Escalation banner -->
+        <div class="escalation-banner">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          <div>
+            <strong>This conversation has been escalated</strong>
+            A senior support specialist will join shortly. Aria stays connected and can keep helping in the meantime.
+          </div>
+        </div>
+
+        <!-- Turn 5: user -->
+        <div class="turn user">
+          <div class="turn-meta">
+            <div class="turn-avatar user">DV</div>
+            <span class="turn-name">You</span>
+            <span class="turn-time">· 11:46 AM</span>
+          </div>
+          <div class="turn-content">
+            Thanks. Can you also confirm my shipping address is current?
+          </div>
+        </div>
+
+        <!-- Turn 6: assistant mid-stream with caret -->
+        <div class="turn assistant">
+          <div class="turn-meta">
+            <div class="turn-avatar assistant">A</div>
+            <span class="turn-name">Aria</span>
+            <span class="turn-time">· now</span>
+          </div>
+
+          <div class="tool-card executing">
+            <div class="tool-header">
+              <span class="tool-status-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+              </span>
+              <span class="tool-label">Running</span>
+              <span class="tool-name">account_info</span>
+              <span class="tool-chevron">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+              </span>
+            </div>
+          </div>
+
+          <div class="turn-content">
+            Let me pull that up for you. Your current shipping address on file is <strong>142 Maple Street, Apt 3B, Brooklyn, NY 11201</strong><span class="caret"></span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div class="composer-wrap">
+      <div class="composer">
+        <textarea rows="1" placeholder="Reply to Aria…"></textarea>
+        <div class="composer-actions">
+          <button class="composer-icon-btn" aria-label="Attach file">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+          </button>
+          <button class="btn-send" disabled aria-label="Send (disabled while streaming)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="composer-hint">
+        Press <kbd>Enter</kbd> to send · <kbd>Shift</kbd> + <kbd>Enter</kbd> for newline · Aria can make mistakes — verify important info
+      </div>
+    </div>
+
+  </main>
+
+</div>
+
+</body>
+</html>

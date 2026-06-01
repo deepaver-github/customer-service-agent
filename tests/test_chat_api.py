@@ -56,6 +56,32 @@ class TestChatAPI:
             delete_resp = await client.delete(f"/sessions/{session_id}")
         assert delete_resp.status_code == 204
 
+    async def test_list_sessions_empty(self):
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            response = await client.get("/sessions")
+        assert response.status_code == 200
+        assert response.json() == {"items": [], "next_cursor": None}
+
+    async def test_list_sessions_with_data(self):
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            for _ in range(3):
+                await client.post("/sessions", json={})
+
+            response = await client.get("/sessions?limit=2")
+        assert response.status_code == 200
+        body = response.json()
+        assert len(body["items"]) == 2
+        assert body["next_cursor"] is not None
+        assert all("last_message_preview" in item for item in body["items"])
+
+    async def test_list_sessions_invalid_cursor(self):
+        transport = ASGITransport(app=app)
+        async with AsyncClient(transport=transport, base_url="http://test") as client:
+            response = await client.get("/sessions?cursor=garbage")
+        assert response.status_code == 400
+
     async def test_chat_endpoint(self):
         from app.agent.service import AgentResponse
         from app.api.dependencies import get_agent_service

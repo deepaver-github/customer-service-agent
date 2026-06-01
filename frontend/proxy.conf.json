@@ -1,0 +1,20 @@
+{
+  "/chat": {
+    "target": "http://localhost:8001",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "info"
+  },
+  "/sessions": {
+    "target": "http://localhost:8001",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "info"
+  },
+  "/health": {
+    "target": "http://localhost:8001",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "info"
+  }
+}

@@ -1,12 +1,14 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.models import (
     MessageResponse,
     SessionCreate,
     SessionDetailResponse,
+    SessionListItem,
+    SessionListResponse,
     SessionResponse,
 )
 from app.memory import repository as repo
@@ -29,6 +31,23 @@ async def create_session(
         created_at=session.created_at,
         updated_at=session.updated_at,
         metadata=session.metadata_,
+    )
+
+
+@router.get("", response_model=SessionListResponse)
+async def list_sessions(
+    cursor: str | None = Query(default=None),
+    limit: int = Query(default=20, ge=1, le=100),
+    db: AsyncSession = Depends(get_db),
+):
+    try:
+        items, next_cursor = await repo.list_sessions(db, cursor=cursor, limit=limit)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+    return SessionListResponse(
+        items=[SessionListItem(**item) for item in items],
+        next_cursor=next_cursor,
     )
 
 

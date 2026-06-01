@@ -5,7 +5,7 @@ from pathlib import Path
 
 import structlog
 from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from app.config import get_settings, get_agent_config
@@ -42,6 +42,14 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:4200"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.get("/health")
 async def health_check():
@@ -55,10 +63,4 @@ app.include_router(sessions.router, prefix="/sessions", tags=["sessions"])
 
 STATIC_DIR = Path(__file__).parent / "static"
 
-
-@app.get("/")
-async def serve_ui():
-    return FileResponse(STATIC_DIR / "index.html")
-
-
-app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
+app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="static")

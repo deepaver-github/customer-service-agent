@@ -1,0 +1,17 @@
+import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { App } from './app';
+
+describe('App', () => {
+  beforeEach(async () => {
+    await TestBed.configureTestingModule({
+      imports: [App],
+      providers: [provideHttpClient()],
+    }).compileComponents();
+  });
+
+  it('creates the app', () => {
+    const fixture = TestBed.createComponent(App);
+    expect(fixture.componentInstance).toBeTruthy();
+  });
+});
