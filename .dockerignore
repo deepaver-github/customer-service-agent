@@ -1,0 +1,50 @@
+# Version control
+.git/
+.gitignore
+.gitattributes
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+*.egg-info/
+
+# Local databases & secrets
+*.db
+*.sqlite
+*.sqlite3
+.env
+.env.*
+!.env.example
+
+# Frontend artifacts (built fresh inside the image)
+frontend/node_modules/
+frontend/dist/
+frontend/.angular/
+app/static/*
+!app/static/.gitkeep
+
+# IDE / OS noise
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+bash.exe.stackdump
+frontend/bash.exe.stackdump
+
+# Tests & docs not needed at runtime
+tests/
+docs/
+*.md
+!agent_config.yaml
+
+# Tooling
+docker-compose.yml
+Dockerfile
+.dockerignore
