@@ -12,8 +12,8 @@ type Tab = 'overview' | 'contacts' | 'plan' | 'services' | 'clinical' | 'history
   imports: [RouterLink],
   template: `
     <div class="flex h-full min-w-0 flex-1 flex-col bg-surface">
-      <header class="flex items-center gap-3.5 border-b border-ink-200 bg-surface/85 px-7 py-3.5">
-        <a routerLink="/participants" class="text-[13.5px] text-ink-500 hover:underline">Participants</a>
+      <header class="flex items-center gap-3 border-b border-ink-200 bg-surface/85 px-4 py-3 sm:gap-3.5 sm:px-7 sm:py-3.5">
+        <a routerLink="/participants" class="flex-shrink-0 text-[13.5px] text-ink-500 hover:underline">Participants</a>
         <span class="text-ink-400">›</span>
         <span class="flex-1 font-display text-[15px] font-semibold tracking-tight">
           @if (data(); as p) {
@@ -29,7 +29,7 @@ type Tab = 'overview' | 'contacts' | 'plan' | 'services' | 'clinical' | 'history
         </a>
       </header>
 
-      <div class="scroll-polish flex-1 overflow-y-auto px-8 pb-12 pt-6">
+      <div class="scroll-polish flex-1 overflow-y-auto px-4 pb-12 pt-6 sm:px-6 md:px-8">
         @if (data(); as p) {
           <!-- Header -->
           <div class="mb-5 flex items-start gap-4 border-b border-ink-200 pb-5">
@@ -67,12 +67,12 @@ type Tab = 'overview' | 'contacts' | 'plan' | 'services' | 'clinical' | 'history
           </div>
 
           <!-- Tabs -->
-          <div class="mb-6 flex gap-1 border-b border-ink-200">
+          <div class="no-scrollbar mb-6 flex gap-1 overflow-x-auto border-b border-ink-200">
             @for (t of tabList(); track t.key) {
               <button
                 type="button"
                 (click)="tab.set(t.key)"
-                class="border-b-2 px-4 py-3 text-[13.5px] transition"
+                class="flex-shrink-0 whitespace-nowrap border-b-2 px-4 py-3 text-[13.5px] transition"
                 [class.border-accent]="tab() === t.key"
                 [class.text-accent-hover]="tab() === t.key"
                 [class.font-semibold]="tab() === t.key"
@@ -96,10 +96,10 @@ type Tab = 'overview' | 'contacts' | 'plan' | 'services' | 'clinical' | 'history
 
           <!-- OVERVIEW -->
           @if (tab() === 'overview') {
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
               <div class="rounded-xl border border-ink-200 bg-white p-5">
                 <h4 class="mb-3 font-display text-[12px] font-bold uppercase tracking-wider text-ink-700">Profile</h4>
-                <dl class="grid grid-cols-[140px_1fr] gap-y-2 text-[13.5px]">
+                <dl class="grid grid-cols-1 gap-y-2 text-[13.5px] sm:grid-cols-[140px_1fr]">
                   <dt class="text-ink-500">Preferred name</dt><dd>{{ p.preferred_name || '—' }}</dd>
                   <dt class="text-ink-500">Date of birth</dt><dd>{{ formatDate(p.dob) || '—' }}</dd>
                   <dt class="text-ink-500">Primary disability</dt><dd class="capitalize">{{ (p.primary_disability_category || '—').replace('_', ' ') }}</dd>
@@ -140,7 +140,7 @@ type Tab = 'overview' | 'contacts' | 'plan' | 'services' | 'clinical' | 'history
                 }
               </div>
 
-              <div class="col-span-2 flex items-center gap-3 rounded-xl border border-accent bg-gradient-to-r from-white to-accent-soft px-5 py-4">
+              <div class="flex flex-wrap items-center gap-3 rounded-xl border border-accent bg-gradient-to-r from-white to-accent-soft px-5 py-4 md:col-span-2">
                 <img src="favicon.png" alt="" class="h-9 w-9 object-contain" />
                 <div class="flex-1">
                   <div class="font-display text-[14px] font-semibold">Ask the Care Assistant about {{ p.first_name }}</div>
@@ -159,7 +159,7 @@ type Tab = 'overview' | 'contacts' | 'plan' | 'services' | 'clinical' | 'history
 
           <!-- CONTACTS -->
           @if (tab() === 'contacts') {
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
               @for (c of p.contacts; track c.id) {
                 <div class="rounded-xl border border-ink-200 bg-white p-5">
                   <div class="mb-3 flex items-center gap-2.5">
@@ -174,7 +174,7 @@ type Tab = 'overview' | 'contacts' | 'plan' | 'services' | 'clinical' | 'history
                       </div>
                     </div>
                   </div>
-                  <dl class="grid grid-cols-[55px_1fr] gap-y-1.5 text-[13px]">
+                  <dl class="grid grid-cols-[55px_1fr] gap-x-2 gap-y-1.5 text-[13px]">
                     <dt class="text-ink-500">Phone</dt><dd>{{ c.phone || '—' }}</dd>
                     <dt class="text-ink-500">Email</dt><dd>{{ c.email || '—' }}</dd>
                     @if (c.notes) {
@@ -193,7 +193,7 @@ type Tab = 'overview' | 'contacts' | 'plan' | 'services' | 'clinical' | 'history
                   }
                 </div>
               } @empty {
-                <div class="col-span-2 rounded-xl border border-dashed border-ink-200 px-5 py-10 text-center text-[13px] text-ink-500">
+                <div class="rounded-xl border border-dashed border-ink-200 px-5 py-10 text-center text-[13px] text-ink-500 md:col-span-2">
                   No contacts on file.
                 </div>
               }
@@ -203,8 +203,8 @@ type Tab = 'overview' | 'contacts' | 'plan' | 'services' | 'clinical' | 'history
           <!-- PLAN & GOALS -->
           @if (tab() === 'plan') {
             @if (p.active_plan; as plan) {
-              <div class="mb-6 grid grid-cols-3 gap-6 rounded-xl border border-accent/15
-                          bg-gradient-to-br from-accent-soft to-brand-teal-soft p-6">
+              <div class="mb-6 grid grid-cols-1 gap-6 rounded-xl border border-accent/15
+                          bg-gradient-to-br from-accent-soft to-brand-teal-soft p-6 sm:grid-cols-3">
                 <div>
                   <div class="text-[11px] font-bold uppercase tracking-wider text-accent-hover">Current plan</div>
                   <div class="mt-1 font-display text-[20px] font-semibold">{{ plan.plan_number }}</div>
@@ -241,7 +241,7 @@ type Tab = 'overview' | 'contacts' | 'plan' | 'services' | 'clinical' | 'history
                 <span class="rounded-full bg-ink-100 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wider">Soon</span>
               </button>
             </div>
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
               @for (g of p.goals; track g.id) {
                 <div class="rounded-xl border border-ink-200 bg-white p-4">
                   <span class="mb-2 inline-block rounded bg-ink-100 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wider text-ink-700">
@@ -263,7 +263,7 @@ type Tab = 'overview' | 'contacts' | 'plan' | 'services' | 'clinical' | 'history
                   </div>
                 </div>
               } @empty {
-                <div class="col-span-2 rounded-xl border border-dashed border-ink-200 px-5 py-8 text-center text-[13px] text-ink-500">
+                <div class="rounded-xl border border-dashed border-ink-200 px-5 py-8 text-center text-[13px] text-ink-500 md:col-span-2">
                   No goals on file.
                 </div>
               }
@@ -272,7 +272,7 @@ type Tab = 'overview' | 'contacts' | 'plan' | 'services' | 'clinical' | 'history
             @if (p.service_agreements.length > 0) {
               <h3 class="mb-3 mt-7 font-display text-[15px] font-semibold">Service agreements</h3>
               <div class="overflow-hidden rounded-xl border border-ink-200 bg-white">
-                <table class="w-full text-[13.5px]">
+                <table class="stack-table w-full text-[13.5px]">
                   <thead>
                     <tr class="border-b border-ink-200 bg-ink-100 text-[11px] font-bold uppercase tracking-wider text-ink-500">
                       <th class="px-5 py-2.5 text-left">Service</th>
@@ -288,11 +288,11 @@ type Tab = 'overview' | 'contacts' | 'plan' | 'services' | 'clinical' | 'history
                           <div class="font-semibold">{{ a.service_name }}</div>
                           <div class="text-[11.5px] text-ink-500">{{ a.service_code }}</div>
                         </td>
-                        <td class="px-5 py-3 text-[13px]">
+                        <td data-label="Period" class="px-5 py-3 text-[13px]">
                           {{ formatDate(a.valid_from) }} → {{ a.valid_to ? formatDate(a.valid_to) : 'open-ended' }}
                         </td>
-                        <td class="px-5 py-3 text-[13px]">{{ a.scope_notes || '—' }}</td>
-                        <td class="px-5 py-3">
+                        <td data-label="Scope" class="px-5 py-3 text-[13px]">{{ a.scope_notes || '—' }}</td>
+                        <td data-label="Status" class="px-5 py-3">
                           <span class="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider"
                                 [class.bg-accent-soft]="a.status === 'active'"
                                 [class.text-accent-hover]="a.status === 'active'"
@@ -314,7 +314,7 @@ type Tab = 'overview' | 'contacts' | 'plan' | 'services' | 'clinical' | 'history
             <h3 class="mb-3 font-display text-[15px] font-semibold">Upcoming shifts</h3>
             @if (p.upcoming_shifts.length > 0) {
               <div class="mb-6 overflow-hidden rounded-xl border border-ink-200 bg-white">
-                <table class="w-full text-[13.5px]">
+                <table class="stack-table w-full text-[13.5px]">
                   <thead>
                     <tr class="border-b border-ink-200 bg-ink-100 text-[11px] font-bold uppercase tracking-wider text-ink-500">
                       <th class="px-5 py-2.5 text-left">When</th>
@@ -331,10 +331,10 @@ type Tab = 'overview' | 'contacts' | 'plan' | 'services' | 'clinical' | 'history
                           <div class="font-semibold">{{ formatDateTime(s.scheduled_start) }}</div>
                           <div class="text-[11.5px] text-ink-500">until {{ formatTime(s.scheduled_end) }}</div>
                         </td>
-                        <td class="px-5 py-3 text-[13px]">{{ s.service_name }}</td>
-                        <td class="px-5 py-3 text-[13px]">{{ s.support_worker_name || 'Unassigned' }}</td>
-                        <td class="px-5 py-3 text-[13px]">{{ s.location || '—' }}</td>
-                        <td class="px-5 py-3">
+                        <td data-label="Service" class="px-5 py-3 text-[13px]">{{ s.service_name }}</td>
+                        <td data-label="Support worker" class="px-5 py-3 text-[13px]">{{ s.support_worker_name || 'Unassigned' }}</td>
+                        <td data-label="Location" class="px-5 py-3 text-[13px]">{{ s.location || '—' }}</td>
+                        <td data-label="Status" class="px-5 py-3">
                           <span class="rounded-full bg-brand-teal-soft px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-brand-teal">
                             {{ s.status.replace('_', ' ') }}
                           </span>
@@ -353,7 +353,7 @@ type Tab = 'overview' | 'contacts' | 'plan' | 'services' | 'clinical' | 'history
             <h3 class="mb-3 font-display text-[15px] font-semibold">Recent shifts</h3>
             @if (p.recent_shifts.length > 0) {
               <div class="overflow-hidden rounded-xl border border-ink-200 bg-white">
-                <table class="w-full text-[13.5px]">
+                <table class="stack-table w-full text-[13.5px]">
                   <thead>
                     <tr class="border-b border-ink-200 bg-ink-100 text-[11px] font-bold uppercase tracking-wider text-ink-500">
                       <th class="px-5 py-2.5 text-left">When</th>
@@ -369,9 +369,9 @@ type Tab = 'overview' | 'contacts' | 'plan' | 'services' | 'clinical' | 'history
                         <td class="px-5 py-3">
                           <div class="font-semibold">{{ formatDateTime(s.scheduled_start) }}</div>
                         </td>
-                        <td class="px-5 py-3 text-[13px]">{{ s.service_name }}</td>
-                        <td class="px-5 py-3 text-[13px]">{{ s.support_worker_name || '—' }}</td>
-                        <td class="px-5 py-3">
+                        <td data-label="Service" class="px-5 py-3 text-[13px]">{{ s.service_name }}</td>
+                        <td data-label="Support worker" class="px-5 py-3 text-[13px]">{{ s.support_worker_name || '—' }}</td>
+                        <td data-label="Status" class="px-5 py-3">
                           <span class="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider"
                                 [class.bg-accent-soft]="s.status === 'completed'"
                                 [class.text-accent-hover]="s.status === 'completed'"
@@ -380,7 +380,7 @@ type Tab = 'overview' | 'contacts' | 'plan' | 'services' | 'clinical' | 'history
                             {{ s.status.replace('_', ' ') }}
                           </span>
                         </td>
-                        <td class="px-5 py-3 text-[12.5px] text-ink-500">{{ s.cancelled_reason || '' }}</td>
+                        <td data-label="Notes" class="px-5 py-3 text-[12.5px] text-ink-500">{{ s.cancelled_reason || '' }}</td>
                       </tr>
                     }
                   </tbody>
@@ -395,9 +395,9 @@ type Tab = 'overview' | 'contacts' | 'plan' | 'services' | 'clinical' | 'history
 
           <!-- CLINICAL — medications, preferences, risk, restrictive, open incidents -->
           @if (tab() === 'clinical') {
-            <div class="grid grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
               <!-- Medications -->
-              <div class="col-span-2 overflow-hidden rounded-xl border border-ink-200 bg-white">
+              <div class="overflow-hidden rounded-xl border border-ink-200 bg-white md:col-span-2">
                 <div class="flex items-center border-b border-ink-200 px-5 py-3">
                   <h3 class="font-display text-[14.5px] font-semibold">Active medications</h3>
                   <span class="ml-2 rounded-full bg-ink-100 px-2 py-0.5 text-[10.5px] font-semibold text-ink-700">
@@ -405,7 +405,7 @@ type Tab = 'overview' | 'contacts' | 'plan' | 'services' | 'clinical' | 'history
                   </span>
                 </div>
                 @if (p.medications.length > 0) {
-                  <table class="w-full text-[13.5px]">
+                  <table class="stack-table w-full text-[13.5px]">
                     <thead>
                       <tr class="border-b border-ink-200 bg-ink-100 text-[11px] font-bold uppercase tracking-wider text-ink-500">
                         <th class="px-5 py-2.5 text-left">Medication</th>
@@ -424,10 +424,10 @@ type Tab = 'overview' | 'contacts' | 'plan' | 'services' | 'clinical' | 'history
                               <span class="rounded bg-escalation-bg px-1.5 py-0.5 text-[10px] font-bold uppercase text-escalation-text">PRN</span>
                             }
                           </td>
-                          <td class="px-5 py-3">{{ m.dose }}</td>
-                          <td class="px-5 py-3 text-[13px]">{{ m.frequency }}</td>
-                          <td class="px-5 py-3 capitalize">{{ m.route }}</td>
-                          <td class="px-5 py-3 text-[12.5px] text-ink-500">{{ m.prescriber || '—' }}</td>
+                          <td data-label="Dose" class="px-5 py-3">{{ m.dose }}</td>
+                          <td data-label="Frequency" class="px-5 py-3 text-[13px]">{{ m.frequency }}</td>
+                          <td data-label="Route" class="px-5 py-3 capitalize">{{ m.route }}</td>
+                          <td data-label="Prescriber" class="px-5 py-3 text-[12.5px] text-ink-500">{{ m.prescriber || '—' }}</td>
                         </tr>
                       }
                     </tbody>
@@ -498,7 +498,7 @@ type Tab = 'overview' | 'contacts' | 'plan' | 'services' | 'clinical' | 'history
               </div>
 
               <!-- Restrictive practices -->
-              <div class="col-span-2 overflow-hidden rounded-xl border border-ink-200 bg-white">
+              <div class="overflow-hidden rounded-xl border border-ink-200 bg-white md:col-span-2">
                 <div class="flex items-center border-b border-ink-200 px-5 py-3">
                   <h3 class="font-display text-[14.5px] font-semibold">Restrictive practices register</h3>
                 </div>
@@ -526,7 +526,7 @@ type Tab = 'overview' | 'contacts' | 'plan' | 'services' | 'clinical' | 'history
 
               <!-- Open incidents -->
               @if (p.open_incidents.length > 0) {
-                <div class="col-span-2 overflow-hidden rounded-xl border border-escalation-text/40 bg-escalation-bg/40">
+                <div class="overflow-hidden rounded-xl border border-escalation-text/40 bg-escalation-bg/40 md:col-span-2">
                   <div class="border-b border-escalation-text/20 px-5 py-3">
                     <h3 class="font-display text-[14.5px] font-semibold text-escalation-text">Open incidents</h3>
                   </div>
@@ -556,7 +556,7 @@ type Tab = 'overview' | 'contacts' | 'plan' | 'services' | 'clinical' | 'history
             </p>
             @if (p.recent_changes.length > 0) {
               <div class="overflow-hidden rounded-xl border border-ink-200 bg-white">
-                <table class="w-full text-[13.5px]">
+                <table class="stack-table w-full text-[13.5px]">
                   <thead>
                     <tr class="border-b border-ink-200 bg-ink-100 text-[11px] font-bold uppercase tracking-wider text-ink-500">
                       <th class="px-5 py-2.5 text-left">When</th>
@@ -570,11 +570,11 @@ type Tab = 'overview' | 'contacts' | 'plan' | 'services' | 'clinical' | 'history
                         <td class="px-5 py-3">
                           <div class="font-semibold">{{ formatDateTime(c.changed_at) }}</div>
                         </td>
-                        <td class="px-5 py-3">
+                        <td data-label="Record" class="px-5 py-3">
                           <div class="capitalize">{{ c.table.replace('_', ' ') }}</div>
                           <div class="font-mono text-[11px] text-ink-500">{{ c.record_id.slice(0, 8) }}…</div>
                         </td>
-                        <td class="px-5 py-3">
+                        <td data-label="Action" class="px-5 py-3">
                           <span class="rounded-full px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider"
                                 [class.bg-accent-soft]="c.action === 'INSERT'"
                                 [class.text-accent-hover]="c.action === 'INSERT'"

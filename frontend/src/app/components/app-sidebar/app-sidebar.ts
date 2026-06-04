@@ -1,14 +1,26 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AuthStore } from '../../services/auth.store';
+import { LayoutStore } from '../../services/layout.store';
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
   imports: [RouterLink, RouterLinkActive],
   template: `
-    <aside class="hidden h-full w-[260px] flex-shrink-0 flex-col border-r border-ink-200
-                  bg-surface-sidebar md:flex">
+    @if (layout.navOpen()) {
+      <div
+        (click)="layout.closeNav()"
+        class="fixed inset-0 z-40 bg-ink-900/40 md:hidden"
+        aria-hidden="true"
+      ></div>
+    }
+    <aside
+      class="fixed inset-y-0 left-0 z-50 flex h-full w-[260px] flex-shrink-0 -translate-x-full
+             flex-col border-r border-ink-200 bg-surface-sidebar transition-transform duration-200
+             md:static md:z-auto md:translate-x-0"
+      [class.translate-x-0]="layout.navOpen()"
+    >
       <div class="flex items-center gap-2.5 px-[18px] pb-3.5 pt-5">
         <img src="favicon.png" alt="Special Care Australia"
              class="h-9 w-9 flex-shrink-0 object-contain" />
@@ -19,6 +31,18 @@ import { AuthStore } from '../../services/auth.store';
           </div>
           <div class="mt-px text-[10.5px] uppercase tracking-wider text-ink-500">Care Assistant</div>
         </div>
+        <button
+          type="button"
+          (click)="layout.closeNav()"
+          aria-label="Close menu"
+          class="ml-auto flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md
+                 text-ink-500 transition hover:bg-surface-hover hover:text-ink-900 md:hidden"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" class="h-4 w-4">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
       </div>
 
       <div class="px-3 pt-2 text-[10.5px] font-bold uppercase tracking-wider text-ink-500">
@@ -112,6 +136,7 @@ import { AuthStore } from '../../services/auth.store';
 })
 export class AppSidebarComponent {
   private auth = inject(AuthStore);
+  protected layout = inject(LayoutStore);
   readonly user = this.auth.currentUser;
 
   async onLogout() {

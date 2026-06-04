@@ -90,7 +90,23 @@
   }
 
   /* === Sidebar (shared) === */
-  .app-shell { display: flex; height: 720px; }
+  .app-shell { display: flex; height: 720px; position: relative;
+    container-type: inline-size; container-name: shell; overflow: hidden; }
+
+  /* Hamburger (hidden on desktop, shown by the @container rule below) */
+  .hamburger {
+    display: none;
+    width: 34px; height: 34px;
+    border: 0; background: none; color: var(--ink-700);
+    border-radius: 8px;
+    align-items: center; justify-content: center;
+    cursor: pointer; flex-shrink: 0;
+  }
+  .hamburger:hover { background: var(--surface-hover); }
+  .hamburger svg { width: 19px; height: 19px; }
+
+  /* Drawer backdrop (inside each .app-shell; inert until .nav-open on mobile) */
+  .scrim { display: none; }
   .sidebar {
     width: 240px;
     flex-shrink: 0;
@@ -691,10 +707,225 @@
     cursor: pointer;
   }
 
+  /* ════════════════════════════════════════════════════════════
+     MOBILE — container queries fire whenever an .app-shell is
+     rendered narrower than 768px (narrow the browser, use DevTools
+     device mode, or view it inside the .phone preview frame below).
+     ════════════════════════════════════════════════════════════ */
+  @container shell (max-width: 768px) {
+    /* Sidebar → off-canvas drawer */
+    .sidebar {
+      position: absolute;
+      top: 0; bottom: 0; left: 0;
+      width: 264px; z-index: 50;
+      transform: translateX(-100%);
+      transition: transform 0.26s ease;
+      box-shadow: 0 12px 40px rgba(24,24,27,0.22);
+    }
+    .nav-open .sidebar { transform: translateX(0); }
+
+    /* Backdrop */
+    .nav-open .scrim {
+      display: block;
+      position: absolute; inset: 0; z-index: 40;
+      background: rgba(24,24,27,0.42);
+    }
+
+    /* Reveal hamburger, tighten the bars */
+    .hamburger { display: inline-flex; }
+    .topbar { height: 52px; padding: 0 14px; gap: 10px; }
+    .topbar h1 { font-size: 16px; }
+    .topbar-search { width: 100%; min-width: 0; }
+    .content { padding: 18px 14px; }
+
+    /* Dashboard grids stack */
+    .stat-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .stat-card .value { font-size: 24px; }
+    .section-row { grid-template-columns: 1fr; }
+
+    /* Detail grids stack */
+    .grid-2, .goals-list, .contacts-list { grid-template-columns: 1fr; }
+    .plan-summary { grid-template-columns: 1fr; gap: 14px; padding: 16px 18px; }
+    .kv { grid-template-columns: 1fr; gap: 0; }
+    .kv dt { margin-top: 8px; }
+    .kv dt:first-child { margin-top: 0; }
+
+    .detail-header { flex-wrap: wrap; }
+    .detail-header h2 { font-size: 19px; }
+    .detail-actions { margin-left: 0; }
+
+    /* Tabs scroll horizontally instead of wrapping */
+    .tabs { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tabs button { white-space: nowrap; flex-shrink: 0; }
+
+    /* Toolbar wraps; search takes its own line */
+    .table-toolbar { flex-wrap: wrap; }
+    .table-search { flex: 1 1 100%; max-width: none; }
+
+    /* Tables → stacked cards */
+    table.data { border: 0; background: transparent; overflow: visible; }
+    table.data thead { display: none; }
+    table.data tr { display: block; background: white;
+      border: 1px solid var(--ink-200); border-radius: 10px;
+      margin-bottom: 10px; overflow: hidden; }
+    table.data tr:hover td { background: transparent; cursor: default; }
+    table.data td {
+      display: flex; justify-content: space-between; align-items: baseline;
+      gap: 16px; padding: 9px 14px;
+      border-bottom: 1px solid var(--ink-100); text-align: right;
+    }
+    table.data tr td:last-child { border-bottom: 0; }
+    table.data td::before {
+      content: attr(data-label);
+      font-weight: 600; color: var(--ink-500);
+      text-transform: uppercase; letter-spacing: 0.04em; font-size: 11px;
+      text-align: left; white-space: nowrap; flex-shrink: 0;
+    }
+    table.data td:first-child { text-align: left; display: block; }
+    table.data td:first-child::before { display: none; }
+  }
+
+  /* ── Phone preview frame (lets the mobile layout render inline) ── */
+  .phone-strip {
+    max-width: 1280px; margin: 0 auto;
+    display: flex; gap: 28px; flex-wrap: wrap;
+    padding: 0 20px;
+  }
+  .phone-col { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .phone-cap { font-size: 12px; font-weight: 600; color: var(--ink-500); letter-spacing: 0.04em; }
+  .phone {
+    width: 380px; max-width: 86vw;
+    border: 10px solid #18181B; border-radius: 36px;
+    overflow: hidden;
+    box-shadow: 0 20px 50px rgba(24,24,27,0.22);
+    background: #18181B;
+  }
+  .phone .app-shell { height: 720px; border-radius: 0; }
+  .hint-banner {
+    max-width: 1280px; margin: 24px auto 0; padding: 14px 18px;
+    background: var(--green-soft); border: 1px solid rgba(30,126,45,0.25);
+    border-radius: 10px; color: var(--green-dark); font-size: 13.5px;
+  }
+  .hint-banner strong { font-family: 'Poppins', sans-serif; }
+
 </style>
 </head>
 <body>
 <div class="ribbon">Mockup — not interactive</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     MOBILE PREVIEW — phone-width frames (render the mobile layout inline)
+     ════════════════════════════════════════════════════════════════ -->
+<div class="screen-label"><span class="num">📱</span> Mobile preview — the same screens below at phone width</div>
+
+<div class="hint-banner">
+  <strong>How this works:</strong> the desktop screens further down are now fully responsive —
+  <strong>narrow your browser</strong> (or use DevTools device mode) and they switch to this mobile layout.
+  The two phone frames here show it without resizing: tap the <strong>☰</strong> menu to open the
+  navigation drawer, tap the dimmed backdrop to close it. Wide tables collapse into labelled cards.
+</div>
+
+<div class="phone-strip" style="margin-top:18px;">
+
+  <!-- Phone A — Dashboard with the nav drawer OPEN -->
+  <div class="phone-col">
+    <div class="phone-cap">Dashboard · nav drawer open</div>
+    <div class="phone">
+      <div class="app-shell nav-open">
+        <div class="scrim" onclick="this.closest('.app-shell').classList.remove('nav-open')"></div>
+        <aside class="sidebar">
+          <div class="brand">
+            <div class="brand-mark"></div>
+            <div><div class="brand-name display">Special Care Australia</div><div class="brand-sub">Care Assistant</div></div>
+          </div>
+          <div class="nav-section-label">Workspace</div>
+          <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard</div>
+          <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Care Assistant</div>
+          <div class="nav-section-label">Manage</div>
+          <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Participants</div>
+          <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Plans &amp; Goals</div>
+          <div class="nav-spacer"></div>
+          <div class="nav-user"><div class="avatar">ML</div><div><div class="name">Maria Lo</div><div class="role">Coordinator</div></div></div>
+        </aside>
+        <main class="main">
+          <header class="topbar">
+            <button class="hamburger" aria-label="Open menu" onclick="this.closest('.app-shell').classList.toggle('nav-open')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <h1>Dashboard</h1>
+          </header>
+          <div class="content">
+            <h2 class="greeting display" style="font-size:20px;">Good morning, Maria.</h2>
+            <p class="greeting-sub" style="font-size:13px;">Here's what's happening today.</p>
+            <div class="stat-grid">
+              <div class="stat-card"><div class="label">Active</div><div class="value">3</div><div class="delta">+1 onboarding</div></div>
+              <div class="stat-card"><div class="label">Plans</div><div class="value">2</div><div class="delta neutral">1 draft</div></div>
+              <div class="stat-card"><div class="label">Agreements</div><div class="value">3</div><div class="delta neutral">1 draft</div></div>
+              <div class="stat-card"><div class="label">Chats today</div><div class="value">7</div><div class="delta">2 escalated</div></div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+  <!-- Phone B — Participants list as stacked cards -->
+  <div class="phone-col">
+    <div class="phone-cap">Participants · table → cards</div>
+    <div class="phone">
+      <div class="app-shell">
+        <div class="scrim" onclick="this.closest('.app-shell').classList.remove('nav-open')"></div>
+        <aside class="sidebar">
+          <div class="brand">
+            <div class="brand-mark"></div>
+            <div><div class="brand-name display">Special Care Australia</div><div class="brand-sub">Care Assistant</div></div>
+          </div>
+          <div class="nav-section-label">Manage</div>
+          <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Participants</div>
+          <div class="nav-spacer"></div>
+          <div class="nav-user"><div class="avatar">ML</div><div><div class="name">Maria Lo</div><div class="role">Coordinator</div></div></div>
+        </aside>
+        <main class="main">
+          <header class="topbar">
+            <button class="hamburger" aria-label="Open menu" onclick="this.closest('.app-shell').classList.toggle('nav-open')">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+            </button>
+            <h1>Participants</h1>
+          </header>
+          <div class="content">
+            <div class="table-toolbar">
+              <input class="table-search" placeholder="Search name, NDIS, suburb…" />
+              <div class="filter-chip active">All · 3</div>
+              <div class="filter-chip">Active · 2</div>
+              <div class="filter-chip">Onboarding · 1</div>
+            </div>
+            <table class="data">
+              <thead><tr><th>Participant</th><th>NDIS #</th><th>Status</th><th>Plan</th><th>Primary contact</th></tr></thead>
+              <tbody>
+                <tr>
+                  <td><div class="cell-name"><div class="avatar-circle">AP</div><div><div class="nm">Aisha Patel</div><div class="sub">Parramatta NSW</div></div></div></td>
+                  <td class="mono" data-label="NDIS #">430112233</td>
+                  <td data-label="Status"><span class="pill active dot">Active</span></td>
+                  <td data-label="Plan">P-AISHA-2025 · Plan-managed</td>
+                  <td data-label="Primary contact">Priya Patel (sister)</td>
+                </tr>
+                <tr>
+                  <td><div class="cell-name"><div class="avatar-circle">CR</div><div><div class="nm">Chloe Ramirez</div><div class="sub">Penrith NSW</div></div></div></td>
+                  <td class="mono" data-label="NDIS #">430778899</td>
+                  <td data-label="Status"><span class="pill onboarding dot">Onboarding</span></td>
+                  <td data-label="Plan">P-CHLOE-2026 · Self-managed</td>
+                  <td data-label="Primary contact">James Ramirez (husband)</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </main>
+      </div>
+    </div>
+  </div>
+
+</div>
 
 <!-- ════════════════════════════════════════════════════════════════
      SCREEN 1 — LOGIN
@@ -739,6 +970,7 @@
 <div class="screen-label"><span class="num">2</span> Staff dashboard — landing screen after sign-in</div>
 <div class="screen-frame">
   <div class="app-shell">
+    <div class="scrim" onclick="this.closest('.app-shell').classList.remove('nav-open')"></div>
     <!-- Sidebar -->
     <aside class="sidebar">
       <div class="brand">
@@ -794,6 +1026,9 @@
     <!-- Main -->
     <main class="main">
       <header class="topbar">
+        <button class="hamburger" aria-label="Open menu" onclick="this.closest('.app-shell').classList.toggle('nav-open')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
         <h1>Dashboard</h1>
         <input class="topbar-search" placeholder="Search participants, plans, knowledge…" />
         <button class="topbar-button">+ New participant</button>
@@ -898,6 +1133,7 @@
 <div class="screen-label"><span class="num">3</span> Participants list — search, filter, add</div>
 <div class="screen-frame">
   <div class="app-shell">
+    <div class="scrim" onclick="this.closest('.app-shell').classList.remove('nav-open')"></div>
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-mark"></div>
@@ -927,6 +1163,9 @@
 
     <main class="main">
       <header class="topbar">
+        <button class="hamburger" aria-label="Open menu" onclick="this.closest('.app-shell').classList.toggle('nav-open')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
         <h1>Participants</h1>
         <button class="btn-primary-sm">+ New participant</button>
       </header>
@@ -961,11 +1200,11 @@
                   </div>
                 </div>
               </td>
-              <td class="mono">430112233</td>
-              <td><span class="pill active dot">Active</span></td>
-              <td>P-AISHA-2025 · Plan-managed</td>
-              <td>Priya Patel (sister)</td>
-              <td>Maria, Tom</td>
+              <td class="mono" data-label="NDIS #">430112233</td>
+              <td data-label="Status"><span class="pill active dot">Active</span></td>
+              <td data-label="Plan">P-AISHA-2025 · Plan-managed</td>
+              <td data-label="Primary contact">Priya Patel (sister)</td>
+              <td data-label="Assigned to">Maria, Tom</td>
             </tr>
             <tr>
               <td>
@@ -977,11 +1216,11 @@
                   </div>
                 </div>
               </td>
-              <td class="mono">430445566</td>
-              <td><span class="pill active dot">Active</span></td>
-              <td>P-BEN-2025 · Agency-managed</td>
-              <td>Linh Nguyen (mother)</td>
-              <td>Tom</td>
+              <td class="mono" data-label="NDIS #">430445566</td>
+              <td data-label="Status"><span class="pill active dot">Active</span></td>
+              <td data-label="Plan">P-BEN-2025 · Agency-managed</td>
+              <td data-label="Primary contact">Linh Nguyen (mother)</td>
+              <td data-label="Assigned to">Tom</td>
             </tr>
             <tr>
               <td>
@@ -993,11 +1232,11 @@
                   </div>
                 </div>
               </td>
-              <td class="mono">430778899</td>
-              <td><span class="pill onboarding dot">Onboarding</span></td>
-              <td>P-CHLOE-2026 · Self-managed <span class="pill draft" style="margin-left:6px;">Draft</span></td>
-              <td>James Ramirez (husband)</td>
-              <td>Maria</td>
+              <td class="mono" data-label="NDIS #">430778899</td>
+              <td data-label="Status"><span class="pill onboarding dot">Onboarding</span></td>
+              <td data-label="Plan">P-CHLOE-2026 · Self-managed <span class="pill draft" style="margin-left:6px;">Draft</span></td>
+              <td data-label="Primary contact">James Ramirez (husband)</td>
+              <td data-label="Assigned to">Maria</td>
             </tr>
           </tbody>
         </table>
@@ -1012,6 +1251,7 @@
 <div class="screen-label"><span class="num">4</span> Participant detail — Overview tab</div>
 <div class="screen-frame">
   <div class="app-shell">
+    <div class="scrim" onclick="this.closest('.app-shell').classList.remove('nav-open')"></div>
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-mark"></div>
@@ -1038,6 +1278,9 @@
 
     <main class="main">
       <header class="topbar">
+        <button class="hamburger" aria-label="Open menu" onclick="this.closest('.app-shell').classList.toggle('nav-open')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
         <h1 style="font-size:14px;font-weight:500;color:var(--ink-500);">
           <a href="#" style="color:var(--ink-500);text-decoration:none;">Participants</a> &nbsp;›&nbsp;
           <span style="color:var(--ink-900);font-weight:600;">Aisha Patel</span>
@@ -1149,6 +1392,7 @@
 <div class="screen-label"><span class="num">5</span> Participant detail — Plan & Goals tab</div>
 <div class="screen-frame">
   <div class="app-shell">
+    <div class="scrim" onclick="this.closest('.app-shell').classList.remove('nav-open')"></div>
     <aside class="sidebar">
       <div class="brand"><div class="brand-mark"></div><div><div class="brand-name display">Special Care Australia</div><div class="brand-sub">Care Assistant</div></div></div>
       <div class="nav-section-label">Workspace</div>
@@ -1169,6 +1413,9 @@
 
     <main class="main">
       <header class="topbar">
+        <button class="hamburger" aria-label="Open menu" onclick="this.closest('.app-shell').classList.toggle('nav-open')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
         <h1 style="font-size:14px;font-weight:500;color:var(--ink-500);">
           <a href="#" style="color:var(--ink-500);text-decoration:none;">Participants</a> &nbsp;›&nbsp;
           <span style="color:var(--ink-900);font-weight:600;">Aisha Patel</span>
@@ -1251,16 +1498,16 @@
           </thead>
           <tbody>
             <tr>
-              <td><strong>Daily Personal Care</strong><br/><span class="sub" style="font-size:11.5px;color:var(--ink-500);">personal_care · Core</span></td>
-              <td>1 Feb 2025 → 14 Jan 2026</td>
-              <td>Morning routine support, weekdays.</td>
-              <td><span class="pill active dot">Active</span></td>
+              <td data-label="Service"><strong>Daily Personal Care</strong><br/><span class="sub" style="font-size:11.5px;color:var(--ink-500);">personal_care · Core</span></td>
+              <td data-label="Period">1 Feb 2025 → 14 Jan 2026</td>
+              <td data-label="Scope">Morning routine support, weekdays.</td>
+              <td data-label="Status"><span class="pill active dot">Active</span></td>
             </tr>
             <tr>
-              <td><strong>Community Participation</strong><br/><span class="sub" style="font-size:11.5px;color:var(--ink-500);">community_participation · Core</span></td>
-              <td>1 Mar 2025 → 14 Jan 2026</td>
-              <td>Weekly community group attendance.</td>
-              <td><span class="pill active dot">Active</span></td>
+              <td data-label="Service"><strong>Community Participation</strong><br/><span class="sub" style="font-size:11.5px;color:var(--ink-500);">community_participation · Core</span></td>
+              <td data-label="Period">1 Mar 2025 → 14 Jan 2026</td>
+              <td data-label="Scope">Weekly community group attendance.</td>
+              <td data-label="Status"><span class="pill active dot">Active</span></td>
             </tr>
           </tbody>
         </table>
@@ -1275,6 +1522,7 @@
 <div class="screen-label"><span class="num">6</span> Participant detail — Contacts tab</div>
 <div class="screen-frame">
   <div class="app-shell">
+    <div class="scrim" onclick="this.closest('.app-shell').classList.remove('nav-open')"></div>
     <aside class="sidebar">
       <div class="brand"><div class="brand-mark"></div><div><div class="brand-name display">Special Care Australia</div><div class="brand-sub">Care Assistant</div></div></div>
       <div class="nav-section-label">Workspace</div>
@@ -1295,6 +1543,9 @@
 
     <main class="main">
       <header class="topbar">
+        <button class="hamburger" aria-label="Open menu" onclick="this.closest('.app-shell').classList.toggle('nav-open')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
         <h1 style="font-size:14px;font-weight:500;color:var(--ink-500);">
           <a href="#" style="color:var(--ink-500);text-decoration:none;">Participants</a> &nbsp;›&nbsp;
           <span style="color:var(--ink-900);font-weight:600;">Aisha Patel</span>

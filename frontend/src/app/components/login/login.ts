@@ -8,7 +8,7 @@ import { AuthStore, UserRole } from '../../services/auth.store';
   standalone: true,
   imports: [FormsModule],
   template: `
-    <div class="relative flex h-screen w-screen items-center justify-center overflow-hidden bg-surface px-6">
+    <div class="relative flex h-screen w-screen items-center justify-center overflow-hidden bg-surface px-4 sm:px-6">
       <div class="pointer-events-none absolute inset-0">
         <div class="absolute -top-32 -left-40 h-[480px] w-[760px] rounded-full
                     bg-brand-teal/30 blur-3xl"></div>
@@ -16,7 +16,7 @@ import { AuthStore, UserRole } from '../../services/auth.store';
                     bg-brand-green/15 blur-3xl"></div>
       </div>
 
-      <div class="relative w-full max-w-[420px] rounded-2xl bg-white p-10
+      <div class="relative w-full max-w-[420px] rounded-2xl bg-white p-7 sm:p-10
                   shadow-[0_24px_80px_rgba(24,24,27,0.12)]">
         <img src="favicon.png" alt="Special Care Australia"
              class="mx-auto mb-5 h-14 w-14 object-contain" />

@@ -12,8 +12,19 @@ interface Group {
   selector: 'app-session-list',
   standalone: true,
   template: `
-    <aside class="hidden h-full w-[280px] flex-shrink-0 flex-col border-r border-ink-200
-                  bg-surface-sidebar md:flex">
+    @if (store.chatListOpen()) {
+      <div
+        (click)="store.closeChatList()"
+        class="fixed inset-0 z-40 bg-ink-900/40 md:hidden"
+        aria-hidden="true"
+      ></div>
+    }
+    <aside
+      class="fixed inset-y-0 left-0 z-50 flex h-full w-[280px] max-w-[85vw] flex-shrink-0
+             -translate-x-full flex-col border-r border-ink-200 bg-surface-sidebar
+             transition-transform duration-200 md:static md:z-auto md:max-w-none md:translate-x-0"
+      [class.translate-x-0]="store.chatListOpen()"
+    >
       <div class="flex items-center gap-2.5 px-[18px] pb-3.5 pt-5">
         <img src="favicon.png" alt="Special Care Australia"
              class="h-9 w-9 flex-shrink-0 object-contain" />
@@ -24,6 +35,18 @@ interface Group {
           </div>
           <div class="mt-px text-[11px] uppercase tracking-wider text-ink-500">NDIS Support</div>
         </div>
+        <button
+          type="button"
+          (click)="store.closeChatList()"
+          aria-label="Close conversations"
+          class="ml-auto flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md
+                 text-ink-500 transition hover:bg-surface-hover hover:text-ink-900 md:hidden"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" class="h-4 w-4">
+            <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          </svg>
+        </button>
       </div>
 
       <div class="px-3.5 pb-3 pt-1.5">

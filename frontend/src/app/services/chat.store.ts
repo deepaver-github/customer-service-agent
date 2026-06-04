@@ -32,6 +32,9 @@ export class ChatStore {
   readonly isStreaming = signal<boolean>(false);
   readonly isEscalated = signal<boolean>(false);
 
+  /** Mobile-only: whether the conversation list is shown as a slide-in sheet. */
+  readonly chatListOpen = signal<boolean>(false);
+
   /** Title of the current session, derived from sessions list or first user turn. */
   readonly currentTitle = computed(() => {
     const id = this.currentSessionId();
@@ -68,8 +71,20 @@ export class ChatStore {
     }
   }
 
+  /* ============ Conversation sheet (mobile) ============ */
+  openChatList(): void {
+    this.chatListOpen.set(true);
+  }
+  closeChatList(): void {
+    this.chatListOpen.set(false);
+  }
+  toggleChatList(): void {
+    this.chatListOpen.update((v) => !v);
+  }
+
   /* ============ Session selection ============ */
   async selectSession(sessionId: string): Promise<void> {
+    this.closeChatList();
     if (this.currentSessionId() === sessionId) return;
     this.chat.cancel();
     this.currentSessionId.set(sessionId);
@@ -81,6 +96,7 @@ export class ChatStore {
   }
 
   newSession(): void {
+    this.closeChatList();
     this.chat.cancel();
     this.currentSessionId.set(null);
     this.turns.set([]);

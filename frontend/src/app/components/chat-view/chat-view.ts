@@ -17,10 +17,22 @@ import { MessageComposerComponent } from '../message-composer/message-composer';
   imports: [MessageItemComponent, MessageComposerComponent],
   template: `
     <div class="flex h-full min-w-0 flex-1 flex-col bg-surface">
-      <header class="flex items-center gap-3.5 border-b border-ink-200
-                     bg-surface/85 px-7 py-3.5 backdrop-blur supports-[backdrop-filter]:bg-surface/60">
+      <header class="flex items-center gap-3 border-b border-ink-200
+                     bg-surface/85 px-4 py-3 backdrop-blur supports-[backdrop-filter]:bg-surface/60 sm:px-7 sm:py-3.5">
+        <button
+          type="button"
+          (click)="store.openChatList()"
+          aria-label="Show conversations"
+          class="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-md
+                 text-ink-700 transition hover:bg-surface-hover md:hidden"
+        >
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+               stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+          </svg>
+        </button>
         <div class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-display
-                    text-[17px] font-semibold tracking-tight">
+                    text-[16px] font-semibold tracking-tight sm:text-[17px]">
           {{ store.currentTitle() }}
         </div>
         @if (store.isEscalated()) {

@@ -12,18 +12,18 @@ type StatusFilter = (typeof STATUSES)[number];
   imports: [RouterLink],
   template: `
     <div class="flex h-full min-w-0 flex-1 flex-col bg-surface">
-      <header class="flex items-center gap-3.5 border-b border-ink-200 bg-surface/85 px-7 py-3.5">
+      <header class="flex items-center gap-3.5 border-b border-ink-200 bg-surface/85 px-4 py-3 sm:px-7 sm:py-3.5">
         <h1 class="flex-1 font-display text-[17px] font-semibold tracking-tight">Participants</h1>
         <a routerLink="/participants/new"
-           class="rounded-md bg-accent px-3.5 py-1.5 text-[13px] font-semibold text-white
+           class="flex-shrink-0 rounded-md bg-accent px-3.5 py-1.5 text-[13px] font-semibold text-white
                   shadow-send transition hover:bg-accent-hover">
-          + New participant
+          + New<span class="hidden sm:inline"> participant</span>
         </a>
       </header>
 
-      <div class="scroll-polish flex-1 overflow-y-auto px-8 pb-12 pt-6">
-        <div class="mb-4 flex items-center gap-2.5">
-          <div class="relative max-w-[360px] flex-1">
+      <div class="scroll-polish flex-1 overflow-y-auto px-4 pb-12 pt-6 sm:px-6 md:px-8">
+        <div class="mb-4 flex flex-wrap items-center gap-2.5">
+          <div class="relative w-full sm:max-w-[360px] sm:flex-1">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                  stroke-linecap="round" stroke-linejoin="round"
                  class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-400">
@@ -60,7 +60,7 @@ type StatusFilter = (typeof STATUSES)[number];
         </div>
 
         <div class="overflow-hidden rounded-xl border border-ink-200 bg-white">
-          <table class="w-full text-[13.5px]">
+          <table class="stack-table w-full text-[13.5px]">
             <thead>
               <tr class="border-b border-ink-200 bg-ink-100 text-[11px] font-bold uppercase tracking-wider text-ink-500">
                 <th class="px-5 py-2.5 text-left">Participant</th>
@@ -92,8 +92,8 @@ type StatusFilter = (typeof STATUSES)[number];
                       </div>
                     </div>
                   </td>
-                  <td class="px-5 py-3.5 font-mono text-[12.5px]">{{ p.ndis_number }}</td>
-                  <td class="px-5 py-3.5">
+                  <td data-label="NDIS #" class="px-5 py-3.5 font-mono text-[12.5px]">{{ p.ndis_number }}</td>
+                  <td data-label="Status" class="px-5 py-3.5">
                     <span class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5
                                  text-[10.5px] font-bold uppercase tracking-wider"
                           [class.bg-accent-soft]="p.status === 'active'"
@@ -106,14 +106,14 @@ type StatusFilter = (typeof STATUSES)[number];
                       {{ p.status }}
                     </span>
                   </td>
-                  <td class="px-5 py-3.5 text-[13px]">
+                  <td data-label="Plan management" class="px-5 py-3.5 text-[13px]">
                     @if (p.active_plan_management_type) {
                       {{ p.active_plan_management_type.replace('_', '-') }}
                     } @else {
                       <span class="text-ink-400">No active plan</span>
                     }
                   </td>
-                  <td class="px-5 py-3.5 text-[13px]">
+                  <td data-label="Primary contact" class="px-5 py-3.5 text-[13px]">
                     @if (p.primary_contact_name) {
                       <div>{{ p.primary_contact_name }}</div>
                       <div class="text-[11.5px] text-ink-500">

@@ -21,6 +21,58 @@
 }
 
 @layer components {
+  /* Hide scrollbar but keep scrolling (mobile tab strips, chip rows) */
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+
+  /* Mobile: render wide data tables as stacked, labelled cards.
+     Add `stack-table` to a <table> and `data-label` to each <td>.
+     The bordered wrapper is auto-flattened via :has so cards don't double-border. */
+  @media (max-width: 767px) {
+    :has(> table.stack-table) {
+      border: 0 !important;
+      border-radius: 0 !important;
+      background: transparent !important;
+      overflow: visible !important;
+    }
+    table.stack-table { display: block; }
+    table.stack-table thead { display: none; }
+    table.stack-table tbody { display: block; }
+    table.stack-table tr {
+      display: block;
+      border: 1px solid theme('colors.ink.200');
+      border-radius: 12px;
+      background: #fff;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    table.stack-table td {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 16px;
+      padding: 8px 14px !important;
+      text-align: right;
+      border-bottom: 1px solid theme('colors.ink.100');
+    }
+    table.stack-table tr td:last-child { border-bottom: 0; }
+    table.stack-table td::before {
+      content: attr(data-label);
+      font-weight: 600;
+      color: theme('colors.ink.500');
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: 11px;
+      text-align: left;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    table.stack-table td:first-child { display: block; text-align: left; }
+    table.stack-table td:first-child::before { display: none; }
+    /* the colspan "empty state" row should stay full-width text, not a flex row */
+    table.stack-table td[colspan] { display: block; text-align: center; }
+  }
+
   /* Scrollbar polish for thread & sidebar */
   .scroll-polish::-webkit-scrollbar { width: 8px; }
   .scroll-polish::-webkit-scrollbar-thumb {
