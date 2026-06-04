@@ -45,6 +45,9 @@ class Settings(BaseSettings):
     @field_validator("database_url")
     @classmethod
     def fix_postgres_scheme(cls, v: str) -> str:
+        # Trim whitespace — leading/trailing spaces in the env var (e.g. from
+        # copy-paste in Railway's Variables UI) cause SQLAlchemy to fail parsing.
+        v = v.strip() if v else v
         if not v or "${{" in v:
             raise ValueError(
                 f"DATABASE_URL is empty or contains an unresolved template: {v!r}. "
