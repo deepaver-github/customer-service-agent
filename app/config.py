@@ -18,8 +18,19 @@ class Settings(BaseSettings):
     @field_validator("database_url")
     @classmethod
     def fix_postgres_scheme(cls, v: str) -> str:
+        if not v or "${{" in v:
+            raise ValueError(
+                f"DATABASE_URL is empty or contains an unresolved template: {v!r}. "
+                "Check the variable reference in Railway's Variables tab."
+            )
+        # Heroku/Railway expose postgres://; SQLAlchemy 2.x requires postgresql://
+        if v.startswith("postgres://"):
+            v = "postgresql://" + v[len("postgres://"):]
         if v.startswith("postgresql://"):
-            return v.replace("postgresql://", "postgresql+asyncpg://", 1)
+            v = "postgresql+asyncpg://" + v[len("postgresql://"):]
+        # asyncpg doesn't understand libpq's sslmode= param; strip/translate it.
+        if "sslmode=" in v:
+            v = v.replace("sslmode=require", "ssl=true").replace("sslmode=", "ssl=")
         return v
     escalation_webhook_url: str | None = Field(
         default=None, alias="ESCALATION_WEBHOOK_URL"
