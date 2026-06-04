@@ -1,0 +1,1368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>SCA Care Assistant — Admin Screens Mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700&family=Open+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --green: #1e7e2d;
+    --green-dark: #1c4f0f;
+    --green-soft: #DCEFDC;
+    --teal: #7ebec5;
+    --teal-soft: #E4F1F3;
+    --surface: #FAFAFA;
+    --surface-sidebar: #F4F4F5;
+    --surface-hover: #ECECEE;
+    --ink-900: #18181B;
+    --ink-700: #3F3F46;
+    --ink-500: #71717A;
+    --ink-400: #A1A1AA;
+    --ink-300: #D4D4D8;
+    --ink-200: #E4E4E7;
+    --ink-100: #F4F4F5;
+    --amber-bg: #FEF3C7;
+    --amber-text: #78350F;
+    --shadow-card: 0 4px 12px rgba(24,24,27,0.06);
+    --shadow-soft: 0 1px 2px rgba(24,24,27,0.04);
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    background: #E9ECEF;
+    font-family: 'Open Sans', system-ui, sans-serif;
+    color: var(--ink-900);
+    font-size: 14.5px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .display { font-family: 'Poppins', system-ui, sans-serif; }
+
+  /* Mockup ribbon */
+  .ribbon {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    background: var(--ink-900);
+    color: white;
+    padding: 6px 14px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    border-radius: 999px;
+    z-index: 1000;
+    box-shadow: 0 4px 14px rgba(24,24,27,0.25);
+  }
+
+  /* Page guide labels between screens */
+  .screen-label {
+    max-width: 1280px;
+    margin: 60px auto 16px;
+    padding: 0 20px;
+    color: var(--ink-500);
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .screen-label .num {
+    display: inline-block;
+    width: 24px;
+    height: 24px;
+    line-height: 24px;
+    text-align: center;
+    background: var(--green);
+    color: white;
+    border-radius: 50%;
+    margin-right: 10px;
+    font-size: 12px;
+  }
+  .screen-frame {
+    max-width: 1280px;
+    margin: 0 auto;
+    background: var(--surface);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(24,24,27,0.10);
+  }
+
+  /* === Sidebar (shared) === */
+  .app-shell { display: flex; height: 720px; }
+  .sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    background: var(--surface-sidebar);
+    border-right: 1px solid var(--ink-200);
+    display: flex; flex-direction: column;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    padding: 18px 16px 14px;
+  }
+  .brand-mark {
+    width: 36px; height: 36px;
+    background: url('https://specialcareaust.com.au/wp-content/uploads/2021/12/cropped-SCA-Favicon-192x192.png') center/contain no-repeat;
+    flex-shrink: 0;
+  }
+  .brand-name {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--green);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+  }
+  .brand-sub {
+    font-size: 10.5px;
+    color: var(--ink-500);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-top: 1px;
+  }
+  .nav-section-label {
+    padding: 14px 18px 4px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-500);
+  }
+  .nav-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 14px;
+    margin: 1px 8px;
+    border-radius: 6px;
+    color: var(--ink-700);
+    cursor: pointer;
+    font-size: 13.5px;
+  }
+  .nav-item:hover { background: var(--surface-hover); }
+  .nav-item.active {
+    background: var(--green-soft);
+    color: var(--green-dark);
+    font-weight: 600;
+  }
+  .nav-item .icon { width: 16px; height: 16px; opacity: 0.85; }
+  .nav-spacer { flex: 1; }
+  .nav-user {
+    display: flex; align-items: center; gap: 10px;
+    padding: 12px 16px;
+    border-top: 1px solid var(--ink-200);
+  }
+  .nav-user .avatar {
+    width: 32px; height: 32px;
+    background: var(--green);
+    color: white;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    font-weight: 700;
+    font-size: 12.5px;
+  }
+  .nav-user .name { font-size: 13px; font-weight: 600; }
+  .nav-user .role { font-size: 11px; color: var(--ink-500); }
+
+  .main { flex: 1; display: flex; flex-direction: column; background: var(--surface); }
+  .topbar {
+    height: 56px;
+    border-bottom: 1px solid var(--ink-200);
+    display: flex; align-items: center;
+    padding: 0 24px;
+    gap: 16px;
+    background: rgba(250,250,250,0.85);
+    backdrop-filter: blur(6px);
+  }
+  .topbar h1 {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    flex: 1;
+  }
+  .topbar-search {
+    width: 280px;
+    padding: 7px 12px 7px 32px;
+    border: 1px solid var(--ink-200);
+    border-radius: 6px;
+    background: white url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2371717A' stroke-width='2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><line x1='21' y1='21' x2='16.65' y2='16.65'/></svg>") 10px center / 14px no-repeat;
+    font-size: 13px;
+    outline: none;
+  }
+  .topbar-search:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-soft); }
+  .topbar-button {
+    background: var(--ink-900);
+    color: white;
+    border: 0;
+    padding: 7px 14px;
+    border-radius: 6px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .topbar-button:hover { background: var(--green); }
+
+  .content {
+    flex: 1;
+    overflow: auto;
+    padding: 28px 32px;
+  }
+
+  /* === Login screen === */
+  .login-screen {
+    height: 720px;
+    display: flex; align-items: center; justify-content: center;
+    background:
+      radial-gradient(ellipse 1200px 600px at 20% -10%, rgba(126,190,197,0.30), transparent 60%),
+      radial-gradient(ellipse 800px 400px at 90% 110%, rgba(30,126,45,0.18), transparent 60%),
+      var(--surface);
+    padding: 30px;
+    position: relative;
+  }
+  .login-card {
+    width: 100%;
+    max-width: 420px;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 24px 80px rgba(24,24,27,0.10);
+    padding: 38px 36px 32px;
+  }
+  .login-logo {
+    width: 56px; height: 56px;
+    margin: 0 auto 18px;
+    background: url('https://specialcareaust.com.au/wp-content/uploads/2021/12/cropped-SCA-Favicon-192x192.png') center/contain no-repeat;
+  }
+  .login-title {
+    font-family: 'Poppins', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    text-align: center;
+    letter-spacing: -0.01em;
+    margin: 0 0 4px;
+  }
+  .login-sub {
+    text-align: center;
+    color: var(--ink-500);
+    font-size: 13.5px;
+    margin: 0 0 24px;
+  }
+  .role-toggle {
+    display: flex;
+    background: var(--ink-100);
+    border-radius: 8px;
+    padding: 3px;
+    margin-bottom: 22px;
+  }
+  .role-toggle button {
+    flex: 1;
+    background: transparent;
+    border: 0;
+    padding: 8px 0;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink-500);
+    border-radius: 6px;
+    cursor: pointer;
+  }
+  .role-toggle button.active {
+    background: white;
+    color: var(--green-dark);
+    box-shadow: var(--shadow-soft);
+  }
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--ink-700);
+    margin-bottom: 6px;
+  }
+  .field input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--ink-200);
+    border-radius: 8px;
+    font: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border-color .15s, box-shadow .15s;
+  }
+  .field input:focus { border-color: var(--green); box-shadow: 0 0 0 3px var(--green-soft); }
+  .row-between {
+    display: flex; justify-content: space-between; align-items: center;
+    margin: 6px 0 22px;
+    font-size: 12.5px;
+  }
+  .row-between a { color: var(--green-dark); text-decoration: none; font-weight: 600; }
+  .row-between a:hover { text-decoration: underline; }
+  .checkbox {
+    display: flex; align-items: center; gap: 6px;
+    color: var(--ink-700);
+  }
+  .btn-primary {
+    width: 100%;
+    background: var(--green);
+    color: white;
+    border: 0;
+    padding: 12px;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 14.5px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(30,126,45,0.30);
+  }
+  .btn-primary:hover { background: var(--green-dark); }
+  .login-footer {
+    text-align: center;
+    font-size: 12px;
+    color: var(--ink-500);
+    margin-top: 18px;
+  }
+  .login-footer a { color: var(--green-dark); font-weight: 600; text-decoration: none; }
+
+  /* === Dashboard stats === */
+  .greeting {
+    margin: 0 0 6px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 24px;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+  .greeting-sub { color: var(--ink-500); margin: 0 0 24px; font-size: 14px; }
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: white;
+    border: 1px solid var(--ink-200);
+    border-radius: 10px;
+    padding: 16px 18px;
+    box-shadow: var(--shadow-soft);
+  }
+  .stat-card .label {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: var(--ink-500);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .stat-card .value {
+    font-family: 'Poppins', sans-serif;
+    font-size: 28px;
+    font-weight: 600;
+    margin: 8px 0 2px;
+  }
+  .stat-card .delta { font-size: 12px; color: var(--green); font-weight: 600; }
+  .stat-card .delta.neutral { color: var(--ink-500); }
+
+  .section-row {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+  }
+  .panel {
+    background: white;
+    border: 1px solid var(--ink-200);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .panel-header {
+    display: flex; align-items: center;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--ink-200);
+  }
+  .panel-header h3 {
+    margin: 0;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14.5px;
+    font-weight: 600;
+  }
+  .panel-header .link {
+    margin-left: auto;
+    color: var(--green-dark);
+    font-size: 12.5px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .panel-body { padding: 0; }
+  .panel-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 18px;
+    border-bottom: 1px solid var(--ink-100);
+  }
+  .panel-row:last-child { border-bottom: 0; }
+  .avatar-circle {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--green-soft);
+    color: var(--green-dark);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .panel-row .meta { flex: 1; }
+  .panel-row .meta .name { font-weight: 600; font-size: 13.5px; }
+  .panel-row .meta .sub { font-size: 12px; color: var(--ink-500); }
+  .pill {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .pill.active { background: var(--green-soft); color: var(--green-dark); }
+  .pill.onboarding { background: var(--teal-soft); color: #295F65; }
+  .pill.draft { background: var(--ink-100); color: var(--ink-700); }
+  .pill.escalated { background: var(--amber-bg); color: var(--amber-text); }
+  .pill.dot::before {
+    content: ''; display: inline-block;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: currentColor;
+  }
+
+  /* === Table === */
+  .table-toolbar {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 16px;
+  }
+  .table-search {
+    flex: 1; max-width: 360px;
+    padding: 8px 12px 8px 34px;
+    border: 1px solid var(--ink-200);
+    border-radius: 6px;
+    background: white url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2371717A' stroke-width='2' stroke-linecap='round'><circle cx='11' cy='11' r='7'/><line x1='21' y1='21' x2='16.65' y2='16.65'/></svg>") 10px center / 14px no-repeat;
+    font-size: 13px;
+    outline: none;
+  }
+  .filter-chip {
+    padding: 7px 12px;
+    border: 1px solid var(--ink-200);
+    border-radius: 6px;
+    background: white;
+    font-size: 12.5px;
+    color: var(--ink-700);
+    cursor: pointer;
+  }
+  .filter-chip.active { background: var(--green-soft); border-color: var(--green); color: var(--green-dark); font-weight: 600; }
+  .ml-auto { margin-left: auto; }
+  .btn-primary-sm {
+    background: var(--green);
+    color: white;
+    border: 0;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(30,126,45,0.25);
+  }
+  .btn-secondary-sm {
+    background: white;
+    color: var(--ink-700);
+    border: 1px solid var(--ink-200);
+    padding: 8px 14px;
+    border-radius: 6px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  table.data {
+    width: 100%;
+    background: white;
+    border: 1px solid var(--ink-200);
+    border-radius: 10px;
+    border-collapse: separate;
+    border-spacing: 0;
+    overflow: hidden;
+    font-size: 13.5px;
+  }
+  table.data th {
+    text-align: left;
+    font-size: 11.5px;
+    font-weight: 700;
+    color: var(--ink-500);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 11px 18px;
+    background: var(--ink-100);
+    border-bottom: 1px solid var(--ink-200);
+  }
+  table.data td {
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--ink-100);
+    vertical-align: middle;
+  }
+  table.data tr:last-child td { border-bottom: 0; }
+  table.data tr:hover td { background: rgba(220,239,220,0.25); cursor: pointer; }
+  .cell-name { display: flex; align-items: center; gap: 10px; }
+  .cell-name .nm { font-weight: 600; }
+  .cell-name .sub { font-size: 12px; color: var(--ink-500); }
+  .mono { font-family: ui-monospace, 'JetBrains Mono', monospace; font-size: 12.5px; }
+
+  /* === Detail page === */
+  .detail-header {
+    display: flex; align-items: flex-start; gap: 16px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid var(--ink-200);
+    margin-bottom: 24px;
+  }
+  .detail-header .avatar-circle { width: 56px; height: 56px; font-size: 18px; }
+  .detail-header h2 {
+    margin: 0 0 4px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .detail-header .row-meta {
+    display: flex; gap: 16px; align-items: center;
+    color: var(--ink-500); font-size: 13px;
+  }
+  .detail-header .row-meta span { display: inline-flex; align-items: center; gap: 5px; }
+  .detail-actions { margin-left: auto; display: flex; gap: 8px; }
+
+  .tabs {
+    display: flex; gap: 4px;
+    border-bottom: 1px solid var(--ink-200);
+    margin: -8px 0 22px;
+  }
+  .tabs button {
+    background: transparent;
+    border: 0;
+    padding: 12px 16px;
+    margin-bottom: -1px;
+    font: inherit;
+    font-size: 13.5px;
+    color: var(--ink-500);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+  }
+  .tabs button.active { color: var(--green-dark); border-bottom-color: var(--green); font-weight: 600; }
+  .tabs .count {
+    margin-left: 6px;
+    background: var(--ink-100);
+    color: var(--ink-700);
+    border-radius: 999px;
+    padding: 1px 7px;
+    font-size: 11px;
+    font-weight: 600;
+  }
+  .tabs button.active .count { background: var(--green-soft); color: var(--green-dark); }
+
+  .grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  .card {
+    background: white;
+    border: 1px solid var(--ink-200);
+    border-radius: 10px;
+    padding: 18px 20px;
+  }
+  .card h4 {
+    margin: 0 0 14px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--ink-700);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .kv { display: grid; grid-template-columns: 130px 1fr; gap: 6px 12px; font-size: 13.5px; }
+  .kv dt { color: var(--ink-500); }
+  .kv dd { margin: 0; }
+  .pref-list { display: flex; flex-direction: column; gap: 8px; }
+  .pref-item {
+    background: var(--surface-sidebar);
+    border-left: 3px solid var(--teal);
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 13.5px;
+  }
+  .pref-item .label { font-size: 11px; color: var(--ink-500); text-transform: uppercase; letter-spacing: 0.05em; }
+
+  /* Plan view */
+  .plan-summary {
+    background: linear-gradient(135deg, var(--green-soft) 0%, var(--teal-soft) 100%);
+    border: 1px solid rgba(30,126,45,0.15);
+    border-radius: 10px;
+    padding: 20px 22px;
+    display: grid;
+    grid-template-columns: 1.6fr 1fr 1fr;
+    gap: 24px;
+    margin-bottom: 22px;
+  }
+  .plan-summary h5 {
+    margin: 0 0 4px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--green-dark);
+    letter-spacing: 0.06em;
+  }
+  .plan-summary .big {
+    font-family: 'Poppins', sans-serif;
+    font-size: 22px;
+    font-weight: 600;
+    color: var(--ink-900);
+    margin-bottom: 2px;
+  }
+  .plan-summary .small { color: var(--ink-700); font-size: 13px; }
+
+  /* Goal cards */
+  .goals-list { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .goal-card {
+    background: white;
+    border: 1px solid var(--ink-200);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .goal-card .cat {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-700);
+    background: var(--ink-100);
+    padding: 3px 8px;
+    border-radius: 4px;
+    text-transform: capitalize;
+    margin-bottom: 8px;
+  }
+  .goal-card .desc { font-size: 14px; line-height: 1.5; margin-bottom: 10px; }
+  .goal-card .footer { display: flex; justify-content: space-between; font-size: 12px; color: var(--ink-500); }
+
+  /* Contacts cards in tab */
+  .contacts-list { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  .contact-card {
+    background: white;
+    border: 1px solid var(--ink-200);
+    border-radius: 10px;
+    padding: 14px 16px;
+  }
+  .contact-card .head {
+    display: flex; align-items: center; gap: 10px;
+    margin-bottom: 8px;
+  }
+  .contact-card .nm { font-weight: 600; font-size: 14px; }
+  .contact-card .rel { font-size: 11.5px; color: var(--ink-500); text-transform: uppercase; letter-spacing: 0.04em; }
+  .contact-card .lines { font-size: 13px; color: var(--ink-700); line-height: 1.5; }
+  .contact-card .lines .label { color: var(--ink-500); width: 50px; display: inline-block; }
+  .contact-card .badges { display: flex; gap: 6px; margin-top: 8px; }
+
+  /* Aria embed in detail */
+  .aria-cta {
+    display: flex; align-items: center; gap: 12px;
+    background: linear-gradient(135deg, #ffffff 0%, var(--green-soft) 100%);
+    border: 1px solid var(--green);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-top: 22px;
+  }
+  .aria-cta .icon {
+    width: 36px; height: 36px;
+    background: url('https://specialcareaust.com.au/wp-content/uploads/2021/12/cropped-SCA-Favicon-192x192.png') center/contain no-repeat;
+    flex-shrink: 0;
+  }
+  .aria-cta .text { flex: 1; }
+  .aria-cta .text strong { font-family: 'Poppins', sans-serif; font-size: 14px; }
+  .aria-cta .text p { margin: 2px 0 0; font-size: 12.5px; color: var(--ink-700); }
+  .aria-cta button {
+    background: var(--green);
+    color: white;
+    border: 0;
+    padding: 9px 16px;
+    border-radius: 6px;
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+</style>
+</head>
+<body>
+<div class="ribbon">Mockup — not interactive</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     SCREEN 1 — LOGIN
+     ════════════════════════════════════════════════════════════════ -->
+<div class="screen-label"><span class="num">1</span> Login screen — staff & participant flavours behind a role toggle</div>
+<div class="screen-frame">
+  <div class="login-screen">
+    <div class="login-card">
+      <div class="login-logo"></div>
+      <h2 class="login-title display">Special Care Australia</h2>
+      <p class="login-sub">Sign in to the Care Assistant</p>
+
+      <div class="role-toggle">
+        <button class="active">I'm a team member</button>
+        <button>Participant / family</button>
+      </div>
+
+      <div class="field">
+        <label>Work email</label>
+        <input type="email" placeholder="maria.lo@specialcareaust.example" />
+      </div>
+      <div class="field">
+        <label>Password</label>
+        <input type="password" placeholder="••••••••" />
+      </div>
+      <div class="row-between">
+        <label class="checkbox"><input type="checkbox" /> Stay signed in for 30 days</label>
+        <a href="#">Forgot password?</a>
+      </div>
+      <button class="btn-primary">Sign in</button>
+
+      <p class="login-footer">
+        Trouble signing in? Contact <a href="#">your manager</a> or call (02) 9000 0000.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     SCREEN 2 — STAFF DASHBOARD (after login)
+     ════════════════════════════════════════════════════════════════ -->
+<div class="screen-label"><span class="num">2</span> Staff dashboard — landing screen after sign-in</div>
+<div class="screen-frame">
+  <div class="app-shell">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark"></div>
+        <div>
+          <div class="brand-name display">Special Care Australia</div>
+          <div class="brand-sub">Care Assistant</div>
+        </div>
+      </div>
+
+      <div class="nav-section-label">Workspace</div>
+      <div class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        Care Assistant
+      </div>
+
+      <div class="nav-section-label">Manage</div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Participants <span style="margin-left:auto;font-size:11px;color:var(--ink-500);font-weight:600;">3</span>
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Plans & Goals
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        Service agreements
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        Staff
+      </div>
+      <div class="nav-item">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Knowledge base
+      </div>
+
+      <div class="nav-spacer"></div>
+      <div class="nav-user">
+        <div class="avatar">ML</div>
+        <div>
+          <div class="name">Maria Lo</div>
+          <div class="role">Coordinator</div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <header class="topbar">
+        <h1>Dashboard</h1>
+        <input class="topbar-search" placeholder="Search participants, plans, knowledge…" />
+        <button class="topbar-button">+ New participant</button>
+      </header>
+      <div class="content">
+        <h2 class="greeting display">Good morning, Maria.</h2>
+        <p class="greeting-sub">Here's what's happening across Special Care Australia today.</p>
+
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="label">Active participants</div>
+            <div class="value">3</div>
+            <div class="delta">+1 onboarding</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Active plans</div>
+            <div class="value">2</div>
+            <div class="delta neutral">1 draft</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Service agreements</div>
+            <div class="value">3</div>
+            <div class="delta neutral">1 draft</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Conversations today</div>
+            <div class="value">7</div>
+            <div class="delta">2 escalated</div>
+          </div>
+        </div>
+
+        <div class="section-row">
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Recent participants</h3>
+              <a class="link" href="#">View all →</a>
+            </div>
+            <div class="panel-body">
+              <div class="panel-row">
+                <div class="avatar-circle">AP</div>
+                <div class="meta">
+                  <div class="name">Aisha Patel</div>
+                  <div class="sub">NDIS 430112233 · Parramatta · Plan-managed</div>
+                </div>
+                <span class="pill active dot">Active</span>
+              </div>
+              <div class="panel-row">
+                <div class="avatar-circle">BN</div>
+                <div class="meta">
+                  <div class="name">Benjamin "Ben" Nguyen</div>
+                  <div class="sub">NDIS 430445566 · Coogee · Agency-managed</div>
+                </div>
+                <span class="pill active dot">Active</span>
+              </div>
+              <div class="panel-row">
+                <div class="avatar-circle">CR</div>
+                <div class="meta">
+                  <div class="name">Chloe Ramirez</div>
+                  <div class="sub">NDIS 430778899 · Penrith · Self-managed</div>
+                </div>
+                <span class="pill onboarding dot">Onboarding</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panel-header">
+              <h3>Recent conversations</h3>
+              <a class="link" href="#">All chats →</a>
+            </div>
+            <div class="panel-body">
+              <div class="panel-row" style="align-items:flex-start;">
+                <div class="meta">
+                  <div class="name">"What's Aisha's active plan?"</div>
+                  <div class="sub">Maria · 12 min ago</div>
+                </div>
+              </div>
+              <div class="panel-row" style="align-items:flex-start;">
+                <div class="meta">
+                  <div class="name">"How do I make a complaint?"</div>
+                  <div class="sub">Anonymous · 1 hr ago</div>
+                </div>
+                <span class="pill escalated dot">Escalated</span>
+              </div>
+              <div class="panel-row" style="align-items:flex-start;">
+                <div class="meta">
+                  <div class="name">"Who is Ben Nguyen's GP?"</div>
+                  <div class="sub">Tom · 2 hr ago</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     SCREEN 3 — PARTICIPANTS LIST
+     ════════════════════════════════════════════════════════════════ -->
+<div class="screen-label"><span class="num">3</span> Participants list — search, filter, add</div>
+<div class="screen-frame">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark"></div>
+        <div>
+          <div class="brand-name display">Special Care Australia</div>
+          <div class="brand-sub">Care Assistant</div>
+        </div>
+      </div>
+      <div class="nav-section-label">Workspace</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Care Assistant</div>
+      <div class="nav-section-label">Manage</div>
+      <div class="nav-item active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        Participants <span style="margin-left:auto;font-size:11px;color:var(--green-dark);font-weight:700;">3</span>
+      </div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Plans & Goals</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Service agreements</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></svg>Staff</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Knowledge base</div>
+      <div class="nav-spacer"></div>
+      <div class="nav-user">
+        <div class="avatar">ML</div>
+        <div><div class="name">Maria Lo</div><div class="role">Coordinator</div></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <h1>Participants</h1>
+        <button class="btn-primary-sm">+ New participant</button>
+      </header>
+      <div class="content">
+        <div class="table-toolbar">
+          <input class="table-search" placeholder="Search by name, NDIS number, suburb…" />
+          <div class="filter-chip active">All · 3</div>
+          <div class="filter-chip">Active · 2</div>
+          <div class="filter-chip">Onboarding · 1</div>
+          <div class="filter-chip">Paused · 0</div>
+        </div>
+
+        <table class="data">
+          <thead>
+            <tr>
+              <th>Participant</th>
+              <th>NDIS #</th>
+              <th>Status</th>
+              <th>Plan</th>
+              <th>Primary contact</th>
+              <th>Assigned to</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <div class="cell-name">
+                  <div class="avatar-circle">AP</div>
+                  <div>
+                    <div class="nm">Aisha Patel</div>
+                    <div class="sub">Parramatta NSW</div>
+                  </div>
+                </div>
+              </td>
+              <td class="mono">430112233</td>
+              <td><span class="pill active dot">Active</span></td>
+              <td>P-AISHA-2025 · Plan-managed</td>
+              <td>Priya Patel (sister)</td>
+              <td>Maria, Tom</td>
+            </tr>
+            <tr>
+              <td>
+                <div class="cell-name">
+                  <div class="avatar-circle">BN</div>
+                  <div>
+                    <div class="nm">Benjamin "Ben" Nguyen</div>
+                    <div class="sub">Coogee NSW</div>
+                  </div>
+                </div>
+              </td>
+              <td class="mono">430445566</td>
+              <td><span class="pill active dot">Active</span></td>
+              <td>P-BEN-2025 · Agency-managed</td>
+              <td>Linh Nguyen (mother)</td>
+              <td>Tom</td>
+            </tr>
+            <tr>
+              <td>
+                <div class="cell-name">
+                  <div class="avatar-circle">CR</div>
+                  <div>
+                    <div class="nm">Chloe Ramirez</div>
+                    <div class="sub">Penrith NSW</div>
+                  </div>
+                </div>
+              </td>
+              <td class="mono">430778899</td>
+              <td><span class="pill onboarding dot">Onboarding</span></td>
+              <td>P-CHLOE-2026 · Self-managed <span class="pill draft" style="margin-left:6px;">Draft</span></td>
+              <td>James Ramirez (husband)</td>
+              <td>Maria</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     SCREEN 4 — PARTICIPANT DETAIL · OVERVIEW TAB
+     ════════════════════════════════════════════════════════════════ -->
+<div class="screen-label"><span class="num">4</span> Participant detail — Overview tab</div>
+<div class="screen-frame">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark"></div>
+        <div>
+          <div class="brand-name display">Special Care Australia</div>
+          <div class="brand-sub">Care Assistant</div>
+        </div>
+      </div>
+      <div class="nav-section-label">Workspace</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Care Assistant</div>
+      <div class="nav-section-label">Manage</div>
+      <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Participants</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Plans & Goals</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Service agreements</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></svg>Staff</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Knowledge base</div>
+      <div class="nav-spacer"></div>
+      <div class="nav-user">
+        <div class="avatar">ML</div>
+        <div><div class="name">Maria Lo</div><div class="role">Coordinator</div></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <h1 style="font-size:14px;font-weight:500;color:var(--ink-500);">
+          <a href="#" style="color:var(--ink-500);text-decoration:none;">Participants</a> &nbsp;›&nbsp;
+          <span style="color:var(--ink-900);font-weight:600;">Aisha Patel</span>
+        </h1>
+        <button class="btn-secondary-sm">Edit profile</button>
+      </header>
+      <div class="content">
+        <div class="detail-header">
+          <div class="avatar-circle">AP</div>
+          <div>
+            <h2>Aisha Patel</h2>
+            <div class="row-meta">
+              <span class="mono">NDIS 430112233</span>
+              <span>·</span>
+              <span>Physical · age 33</span>
+              <span>·</span>
+              <span>Parramatta NSW</span>
+              <span class="pill active dot" style="margin-left:6px;">Active</span>
+            </div>
+          </div>
+          <div class="detail-actions">
+            <button class="btn-secondary-sm">⋯ More</button>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <button class="active">Overview</button>
+          <button>Contacts <span class="count">2</span></button>
+          <button>Plan & Goals <span class="count">2</span></button>
+          <button>Services <span class="count">2</span></button>
+          <button>History</button>
+        </div>
+
+        <div class="grid-2">
+          <div class="card">
+            <h4>Profile</h4>
+            <dl class="kv">
+              <dt>Preferred name</dt><dd>Aisha</dd>
+              <dt>Date of birth</dt><dd>14 April 1992 (33)</dd>
+              <dt>Primary disability</dt><dd>Physical</dd>
+              <dt>Phone</dt><dd>+61 412 555 101</dd>
+              <dt>Email</dt><dd>aisha.p@example.com</dd>
+              <dt>Address</dt><dd>14 Acacia Street, Parramatta NSW 2150</dd>
+            </dl>
+          </div>
+
+          <div class="card">
+            <h4>Communication needs</h4>
+            <p style="margin:0 0 14px;line-height:1.55;">
+              Prefers SMS over phone. English only.
+            </p>
+            <h4 style="margin-top:18px;">Preferences (4)</h4>
+            <div class="pref-list">
+              <div class="pref-item"><span class="label">Routine</span><br/>Likes a quiet morning. Doesn't like to be rushed before 9am.</div>
+              <div class="pref-item"><span class="label">Like</span><br/>Loves audiobooks during personal-care routine.</div>
+              <div class="pref-item"><span class="label">Trigger</span><br/>Loud noises can cause anxiety — avoid the back stairs entrance.</div>
+            </div>
+          </div>
+
+          <div class="card">
+            <h4>Active plan</h4>
+            <div class="plan-summary" style="grid-template-columns:1fr;padding:14px 16px;margin-bottom:0;">
+              <div>
+                <h5>P-AISHA-2025</h5>
+                <div class="big">15 Jan 2025 → 14 Jan 2026</div>
+                <div class="small">Plan-managed by Western Sydney Plan Management</div>
+              </div>
+            </div>
+            <p style="font-size:12px;color:var(--ink-500);margin:10px 0 0;">Plan ends in <strong>~7 months</strong> · 2 active goals</p>
+          </div>
+
+          <div class="card">
+            <h4>Assigned team</h4>
+            <div class="panel-row" style="padding:8px 0;border-bottom:1px solid var(--ink-100);">
+              <div class="avatar-circle">ML</div>
+              <div class="meta">
+                <div class="name">Maria Lo</div>
+                <div class="sub">Coordinator · since Jan 2025</div>
+              </div>
+              <span class="pill active" style="font-size:10px;">Primary</span>
+            </div>
+            <div class="panel-row" style="padding:8px 0;border-bottom:0;">
+              <div class="avatar-circle">TS</div>
+              <div class="meta">
+                <div class="name">Tom Schultz</div>
+                <div class="sub">Support worker · weekday mornings</div>
+              </div>
+              <span class="pill active" style="font-size:10px;">Primary</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="aria-cta">
+          <div class="icon"></div>
+          <div class="text">
+            <strong>Ask the Care Assistant about Aisha</strong>
+            <p>Quick lookups: "What are her current goals?" · "Who's her emergency contact?" · "When does her plan end?"</p>
+          </div>
+          <button>Open chat ↗</button>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     SCREEN 5 — PARTICIPANT DETAIL · PLAN & GOALS TAB
+     ════════════════════════════════════════════════════════════════ -->
+<div class="screen-label"><span class="num">5</span> Participant detail — Plan & Goals tab</div>
+<div class="screen-frame">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark"></div><div><div class="brand-name display">Special Care Australia</div><div class="brand-sub">Care Assistant</div></div></div>
+      <div class="nav-section-label">Workspace</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Care Assistant</div>
+      <div class="nav-section-label">Manage</div>
+      <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Participants</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Plans & Goals</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Service agreements</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></svg>Staff</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Knowledge base</div>
+      <div class="nav-spacer"></div>
+      <div class="nav-user">
+        <div class="avatar">ML</div>
+        <div><div class="name">Maria Lo</div><div class="role">Coordinator</div></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <h1 style="font-size:14px;font-weight:500;color:var(--ink-500);">
+          <a href="#" style="color:var(--ink-500);text-decoration:none;">Participants</a> &nbsp;›&nbsp;
+          <span style="color:var(--ink-900);font-weight:600;">Aisha Patel</span>
+        </h1>
+        <button class="btn-secondary-sm">Edit plan</button>
+      </header>
+      <div class="content">
+        <div class="detail-header" style="padding-bottom:14px;margin-bottom:16px;">
+          <div class="avatar-circle">AP</div>
+          <div>
+            <h2 style="font-size:18px;">Aisha Patel</h2>
+            <div class="row-meta">
+              <span class="mono">NDIS 430112233</span>
+              <span class="pill active dot" style="margin-left:6px;">Active</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <button>Overview</button>
+          <button>Contacts <span class="count">2</span></button>
+          <button class="active">Plan & Goals <span class="count">2</span></button>
+          <button>Services <span class="count">2</span></button>
+          <button>History</button>
+        </div>
+
+        <div class="plan-summary">
+          <div>
+            <h5>Current plan</h5>
+            <div class="big">P-AISHA-2025</div>
+            <div class="small">15 Jan 2025 → 14 Jan 2026 · plan-managed</div>
+          </div>
+          <div>
+            <h5>Plan manager</h5>
+            <div class="big" style="font-size:16px;">Western Sydney Plan Management</div>
+            <div class="small">claims@wspm.example</div>
+          </div>
+          <div>
+            <h5>Goals on this plan</h5>
+            <div class="big">2 active</div>
+            <div class="small">0 achieved · 0 paused</div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;margin-bottom:12px;">
+          <h3 style="margin:0;font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;">Goals</h3>
+          <div class="ml-auto">
+            <button class="btn-primary-sm">+ Add goal</button>
+          </div>
+        </div>
+
+        <div class="goals-list">
+          <div class="goal-card">
+            <span class="cat">Independence · Core funding</span>
+            <p class="desc">Maintain independent living in current home with morning supports.</p>
+            <div class="footer">
+              <span>Target: 14 Jan 2026</span>
+              <span class="pill active" style="font-size:10.5px;">Active</span>
+            </div>
+          </div>
+          <div class="goal-card">
+            <span class="cat">Community · Core funding</span>
+            <p class="desc">Attend community art group at Parramatta library weekly.</p>
+            <div class="footer">
+              <span>No target date</span>
+              <span class="pill active" style="font-size:10.5px;">Active</span>
+            </div>
+          </div>
+        </div>
+
+        <h3 style="margin:28px 0 12px;font-family:'Poppins',sans-serif;font-size:15px;font-weight:600;">Service agreements funded under this plan</h3>
+        <table class="data">
+          <thead>
+            <tr>
+              <th>Service</th>
+              <th>Period</th>
+              <th>Scope</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>Daily Personal Care</strong><br/><span class="sub" style="font-size:11.5px;color:var(--ink-500);">personal_care · Core</span></td>
+              <td>1 Feb 2025 → 14 Jan 2026</td>
+              <td>Morning routine support, weekdays.</td>
+              <td><span class="pill active dot">Active</span></td>
+            </tr>
+            <tr>
+              <td><strong>Community Participation</strong><br/><span class="sub" style="font-size:11.5px;color:var(--ink-500);">community_participation · Core</span></td>
+              <td>1 Mar 2025 → 14 Jan 2026</td>
+              <td>Weekly community group attendance.</td>
+              <td><span class="pill active dot">Active</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════════════════
+     SCREEN 6 — PARTICIPANT DETAIL · CONTACTS TAB
+     ════════════════════════════════════════════════════════════════ -->
+<div class="screen-label"><span class="num">6</span> Participant detail — Contacts tab</div>
+<div class="screen-frame">
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="brand"><div class="brand-mark"></div><div><div class="brand-name display">Special Care Australia</div><div class="brand-sub">Care Assistant</div></div></div>
+      <div class="nav-section-label">Workspace</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Care Assistant</div>
+      <div class="nav-section-label">Manage</div>
+      <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>Participants</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>Plans & Goals</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>Service agreements</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><circle cx="12" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/></svg>Staff</div>
+      <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="icon"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Knowledge base</div>
+      <div class="nav-spacer"></div>
+      <div class="nav-user">
+        <div class="avatar">ML</div>
+        <div><div class="name">Maria Lo</div><div class="role">Coordinator</div></div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <h1 style="font-size:14px;font-weight:500;color:var(--ink-500);">
+          <a href="#" style="color:var(--ink-500);text-decoration:none;">Participants</a> &nbsp;›&nbsp;
+          <span style="color:var(--ink-900);font-weight:600;">Aisha Patel</span>
+        </h1>
+        <button class="btn-primary-sm">+ Add contact</button>
+      </header>
+      <div class="content">
+        <div class="detail-header" style="padding-bottom:14px;margin-bottom:16px;">
+          <div class="avatar-circle">AP</div>
+          <div>
+            <h2 style="font-size:18px;">Aisha Patel</h2>
+            <div class="row-meta">
+              <span class="mono">NDIS 430112233</span>
+              <span class="pill active dot" style="margin-left:6px;">Active</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="tabs">
+          <button>Overview</button>
+          <button class="active">Contacts <span class="count">2</span></button>
+          <button>Plan & Goals <span class="count">2</span></button>
+          <button>Services <span class="count">2</span></button>
+          <button>History</button>
+        </div>
+
+        <div class="contacts-list">
+          <div class="contact-card">
+            <div class="head">
+              <div class="avatar-circle">PP</div>
+              <div style="flex:1;">
+                <div class="nm">Priya Patel</div>
+                <div class="rel">Family · sister</div>
+              </div>
+            </div>
+            <div class="lines">
+              <div><span class="label">Phone</span> +61 412 555 102</div>
+              <div><span class="label">Email</span> priya.p@example.com</div>
+              <div><span class="label">Notes</span> Sister. First point of contact.</div>
+            </div>
+            <div class="badges">
+              <span class="pill active dot">Primary</span>
+              <span class="pill escalated dot">Emergency</span>
+            </div>
+          </div>
+
+          <div class="contact-card">
+            <div class="head">
+              <div class="avatar-circle">WS</div>
+              <div style="flex:1;">
+                <div class="nm">Western Sydney Plan Management</div>
+                <div class="rel">Plan manager</div>
+              </div>
+            </div>
+            <div class="lines">
+              <div><span class="label">Phone</span> +61 2 9000 4400</div>
+              <div><span class="label">Email</span> claims@wspm.example</div>
+              <div><span class="label">Notes</span> —</div>
+            </div>
+            <div class="badges"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div style="height:80px;"></div>
+
+</body>
+</html>

@@ -1,140 +1,84 @@
-# Customer Service AI Agent
+# Special Care Australia — AI Care Assistant
 
-A general-purpose customer service AI agent powered by Claude (Anthropic). Built with Python, FastAPI, and PostgreSQL.
+A customer-facing AI assistant for **Special Care Australia**, an NDIS-registered disability support provider. Participants, families, support coordinators, and staff chat with the assistant to look up participant records, find services, ask NDIS questions, and reach a human when needed.
 
-## Features
+Backend is a FastAPI + PostgreSQL app using Claude (Anthropic) for natural language. Frontend is an Angular SPA served from the same origin. The database is the **system of record** for SCA's operations (participants, plans, shifts, notes, incidents) — billing is intentionally excluded and handled by external software.
 
-- **Multi-turn conversations** with persistent session memory
-- **Tool calling** — the agent can look up orders, check accounts, search FAQs
-- **Human escalation** — detects when to hand off to a human agent via webhook
-- **Token-by-token streaming** — real-time SSE responses using Claude's streaming API
-- **Configurable** — customize personality, tools, and escalation rules via YAML
+For the deeper docs, see:
 
-## Quick Start
+- **[CLAUDE.md](./CLAUDE.md)** — architecture, conventions, API surface, what's done / what's left
+- **[DB_Design.md](./DB_Design.md)** — full schema, FKs, triggers, soft-delete, phase status
+- **[PLAN.md](./PLAN.md)** — single working plan: what's implemented and what's next, in shippable phases
 
-### 1. Install
+## Prerequisites
+
+- Python 3.10+
+- Node 20+ and npm (for the Angular frontend)
+- Docker (for PostgreSQL)
+- An Anthropic API key
+
+## Quick start
 
 ```bash
+# 1. Install Python deps
 python -m venv .venv
-.venv\Scripts\activate     # Windows
-# source .venv/bin/activate  # macOS/Linux
-
+.venv\Scripts\activate                    # Windows
+# source .venv/bin/activate                # macOS/Linux
 pip install -e ".[dev]"
+
+# 2. Configure secrets — create .env with at minimum:
+#    ANTHROPIC_API_KEY=sk-ant-...
+#    DATABASE_URL=postgresql+asyncpg://agent:agent@localhost:5432/customer_service
+
+# 3. Start PostgreSQL
+docker compose up -d
+
+# 4. Seed the database (creates tables + triggers + sample NDIS data + user accounts)
+python -m app.memory.seed
+
+# 5. Build the Angular SPA into app/static/
+cd frontend && npm ci && npm run build && cd ..
+
+# 6. Run the backend (serves API + SPA)
+uvicorn app.main:app --reload --port 8001
 ```
 
-### 2. Configure
+Visit **http://127.0.0.1:8001** — you'll be redirected to `/login`.
+
+> **Port note:** port 8000 is blocked on some Windows setups; this project defaults to **8001**.
+
+## Default login (dev only)
+
+The seed creates six accounts, all with password **`ChangeMe!2026`**:
+
+| Email | Role | Sees |
+|---|---|---|
+| `admin@specialcareaust.example` | Administrator | All participants; own chats + every `escalated` chat across users |
+| `maria.lo@specialcareaust.example` | Coordinator (staff) | All participants; own chats only |
+| `tom.s@specialcareaust.example` | Support worker (staff) | All participants; own chats only |
+| `aisha.p@example.com` | Participant | Only her own record; own chats only |
+| `ben.n@example.com` | Participant | Only Ben's record; own chats only |
+| `chloe.r@example.com` | Participant | Only Chloe's record; own chats only |
+
+> **Rotate this password before any real participant data lands.** It's in source.
+
+## Frontend dev server (hot reload)
 
 ```bash
-copy .env .env
+cd frontend && npm start          # serves http://localhost:4200, proxies /chat /sessions /participants /auth … to :8001
 ```
 
-Edit `.env` and add your Anthropic API key:
-
-```
-ANTHROPIC_API_KEY=sk-ant-your-key-here
-```
-
-### 3. Run
-
-```bash
-uvicorn app.main:app --reload
-```
-
-The server starts at `http://localhost:8001`. API docs at `http://localhost:8001/docs`.
-
-> **Note:** Port 8000 is blocked on some machines; this project defaults to port 8001.
-
-### Prerequisites
-
-- **PostgreSQL** — run via Docker:
-  ```bash
-  docker compose up -d
-  ```
-
-## API Endpoints
-
-| Method | Path | Description |
-|--------|------|-------------|
-| `POST` | `/chat` | Send a message, get a response |
-| `POST` | `/chat/stream` | Send a message, get SSE stream |
-| `POST` | `/sessions` | Create a new session |
-| `GET` | `/sessions/{id}` | Get session details + messages |
-| `DELETE` | `/sessions/{id}` | Close a session |
-| `GET` | `/health` | Health check |
-
-### Example: Chat
-
-```bash
-curl -X POST http://localhost:8001/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "Where is my order ORD-1234?"}'
-```
-
-Response:
-
-```json
-{
-  "session_id": "uuid-here",
-  "response": "I found your order ORD-1234. It has been shipped...",
-  "escalated": false,
-  "tools_used": ["lookup_order"]
-}
-```
-
-### Example: Continue a conversation
-
-```bash
-curl -X POST http://localhost:8001/chat \
-  -H "Content-Type: application/json" \
-  -d '{"session_id": "uuid-from-above", "message": "When will it arrive?"}'
-```
-
-## Configuration
-
-### Agent Behavior (`agent_config.yaml`)
-
-- **personality** — system prompt / agent instructions
-- **model** — Claude model to use (default: `claude-sonnet-4-6`)
-- **enabled_tools** — which tools the agent can use
-- **escalation** — when to hand off to a human
-
-### Adding Custom Tools
-
-1. Create a file in `app/tools/examples/` (or any module)
-2. Use the `@register_tool` decorator:
-
-```python
-from app.tools.registry import register_tool
-
-@register_tool(
-    name="my_tool",
-    description="What this tool does",
-)
-def my_tool(param1: str, param2: int = 0) -> dict:
-    # Your logic here
-    return {"result": "..."}
-```
-
-3. Add the tool name to `enabled_tools` in `agent_config.yaml`
-4. Import the module in `app/tools/examples/__init__.py`
-
-## Testing
+## Tests
 
 ```bash
 pytest -v
+# 98 pass, 4 known-failing streaming-mock tests, 3 Postgres-only immutability tests skipped
+
+# To run the Postgres-only tests against the local docker DB (Windows PowerShell):
+$env:TEST_DATABASE_URL = "postgresql+asyncpg://agent:agent@localhost:5432/customer_service"
+pytest tests/test_immutability.py -v
 ```
 
-## Project Structure
+## License
 
-```
-app/
-  main.py              # FastAPI app entry point
-  config.py            # Settings and config loading
-  api/routes/          # REST endpoints
-  agent/               # Claude integration and orchestration
-  tools/               # Pluggable tool system
-  memory/              # PostgreSQL conversation persistence
-  escalation/          # Human handoff logic
-tests/                 # Test suite
-agent_config.yaml      # Agent behavior configuration
-```
+Internal. Not for redistribution.

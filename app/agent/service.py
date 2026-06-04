@@ -53,13 +53,14 @@ class AgentService:
         db: AsyncSession,
         message: str,
         session_id: str | None = None,
+        user_id: str | None = None,
     ) -> AgentResponse:
         if session_id:
             session = await repo.get_session(db, session_id)
             if session is None:
-                session = await repo.create_session(db)
+                session = await repo.create_session(db, user_id=user_id)
         else:
-            session = await repo.create_session(db)
+            session = await repo.create_session(db, user_id=user_id)
 
         messages = await self._build_messages(db, session.id, message)
         await repo.add_message(db, session.id, "user", message)
@@ -163,13 +164,14 @@ class AgentService:
         db: AsyncSession,
         message: str,
         session_id: str | None = None,
+        user_id: str | None = None,
     ) -> AsyncIterator[dict]:
         if session_id:
             session = await repo.get_session(db, session_id)
             if session is None:
-                session = await repo.create_session(db)
+                session = await repo.create_session(db, user_id=user_id)
         else:
-            session = await repo.create_session(db)
+            session = await repo.create_session(db, user_id=user_id)
 
         messages = await self._build_messages(db, session.id, message)
         await repo.add_message(db, session.id, "user", message)

@@ -11,7 +11,37 @@
     "changeOrigin": true,
     "logLevel": "info"
   },
+  "/participants": {
+    "target": "http://localhost:8001",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "info"
+  },
+  "/staff": {
+    "target": "http://localhost:8001",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "info"
+  },
+  "/knowledge": {
+    "target": "http://localhost:8001",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "info"
+  },
+  "/dashboard": {
+    "target": "http://localhost:8001",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "info"
+  },
   "/health": {
+    "target": "http://localhost:8001",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "info"
+  },
+  "/auth": {
     "target": "http://localhost:8001",
     "secure": false,
     "changeOrigin": true,

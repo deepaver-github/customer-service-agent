@@ -32,6 +32,13 @@ agent:
   enabled_tools:
     - lookup_participant
     - get_contacts
+    - get_active_plan
+    - get_goals
+    - get_upcoming_shifts
+    - get_recent_shifts
+    - get_preferences
+    - get_medications
+    - get_participant_changes
     - search_knowledge
     - escalate
 

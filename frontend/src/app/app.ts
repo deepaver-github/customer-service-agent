@@ -1,22 +1,10 @@
-import { Component, OnInit, inject } from '@angular/core';
-import { ChatStore } from './services/chat.store';
-import { SessionListComponent } from './components/session-list/session-list';
-import { ChatViewComponent } from './components/chat-view/chat-view';
+import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [SessionListComponent, ChatViewComponent],
-  template: `
-    <div class="flex h-screen w-screen overflow-hidden">
-      <app-session-list></app-session-list>
-      <app-chat-view></app-chat-view>
-    </div>
-  `,
+  imports: [RouterOutlet],
+  template: `<router-outlet></router-outlet>`,
 })
-export class App implements OnInit {
-  private store = inject(ChatStore);
-  ngOnInit() {
-    this.store.loadSessions().catch(() => {});
-  }
-}
+export class App {}

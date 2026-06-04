@@ -5,13 +5,30 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import pytest
 from httpx import ASGITransport, AsyncClient
 
+from app.auth.dependencies import current_staff, current_user
 from app.main import app
 from app.memory.database import init_db
+from app.memory.models import User, UserRole
+
+
+def _fake_staff_user() -> User:
+    return User(
+        id="00000000-0000-0000-0000-000000000001",
+        email="test-staff@example.test",
+        password_hash="x",
+        role=UserRole.COORDINATOR,
+    )
 
 
 @pytest.fixture(autouse=True)
 async def setup_db():
     await init_db("sqlite+aiosqlite:///:memory:")
+    # Bypass auth in chat-API regression tests — they predate auth.
+    app.dependency_overrides[current_user] = lambda: _fake_staff_user()
+    app.dependency_overrides[current_staff] = lambda: _fake_staff_user()
+    yield
+    app.dependency_overrides.pop(current_user, None)
+    app.dependency_overrides.pop(current_staff, None)
 
 
 class TestChatAPI:
@@ -114,7 +131,7 @@ class TestChatAPI:
     async def test_chat_stream_endpoint(self):
         from app.api.dependencies import get_agent_service
 
-        async def fake_stream(db, message, session_id=None):
+        async def fake_stream(db, message, session_id=None, user_id=None):
             yield {"event": "stream_start", "data": {"session_id": "test-session"}}
             yield {"event": "text_delta", "data": {"delta": "Hello"}}
             yield {"event": "done", "data": {"response": "Hello", "session_id": "test-session", "escalated": False, "tools_used": []}}

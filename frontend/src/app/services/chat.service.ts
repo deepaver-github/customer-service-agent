@@ -1,4 +1,5 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
+import { Router } from '@angular/router';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import {
   DoneEvent,
@@ -11,6 +12,7 @@ import {
   ToolResultEvent,
   ToolStartEvent,
 } from '../models/sse-events.model';
+import { AuthStore } from './auth.store';
 
 export interface StreamCallbacks {
   onStart: (e: StreamStartEvent) => void;
@@ -24,6 +26,8 @@ export interface StreamCallbacks {
 
 @Injectable({ providedIn: 'root' })
 export class ChatService {
+  private auth = inject(AuthStore);
+  private router = inject(Router);
   private currentAbort: AbortController | null = null;
 
   /** Start a streaming chat request. Returns an AbortController the caller can use. */
@@ -35,14 +39,28 @@ export class ChatService {
     const ctrl = new AbortController();
     this.currentAbort = ctrl;
 
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      Accept: 'text/event-stream',
+    };
+    const token = this.auth.tokenSnapshot();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
     try {
       await fetchEventSource('/chat/stream', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json', Accept: 'text/event-stream' },
+        headers,
         body: JSON.stringify(body),
         signal: ctrl.signal,
         openWhenHidden: true,
         onopen: async (resp) => {
+          if (resp.status === 401) {
+            this.auth.clear();
+            this.router.navigate(['/login'], { queryParams: { reason: 'expired' } });
+            throw new Error('Session expired — please sign in again.');
+          }
           if (!resp.ok) {
             const text = await resp.text().catch(() => '');
             throw new Error(`HTTP ${resp.status}: ${text || resp.statusText}`);

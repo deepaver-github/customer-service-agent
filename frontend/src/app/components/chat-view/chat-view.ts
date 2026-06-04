@@ -19,19 +19,6 @@ import { MessageComposerComponent } from '../message-composer/message-composer';
     <div class="flex h-full min-w-0 flex-1 flex-col bg-surface">
       <header class="flex items-center gap-3.5 border-b border-ink-200
                      bg-surface/85 px-7 py-3.5 backdrop-blur supports-[backdrop-filter]:bg-surface/60">
-        <button
-          type="button"
-          class="flex h-9 w-9 items-center justify-center rounded-lg text-ink-700
-                 hover:bg-surface-hover md:hidden"
-          aria-label="Open conversations"
-        >
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-               stroke-linecap="round" stroke-linejoin="round" class="h-[18px] w-[18px]">
-            <line x1="3" y1="6" x2="21" y2="6"/>
-            <line x1="3" y1="12" x2="21" y2="12"/>
-            <line x1="3" y1="18" x2="21" y2="18"/>
-          </svg>
-        </button>
         <div class="flex-1 overflow-hidden text-ellipsis whitespace-nowrap font-display
                     text-[17px] font-semibold tracking-tight">
           {{ store.currentTitle() }}

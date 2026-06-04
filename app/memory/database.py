@@ -32,6 +32,23 @@ AUDITED_TABLES = (
     "contacts",
     "staff",
     "participant_staff_assignments",
+    "plans",
+    "goals",
+    "plan_goals",
+    "service_agreements",
+    # Phase 3
+    "shifts",
+    # Phase 4
+    "progress_notes",
+    "incidents",
+    "incident_followups",
+    "medication_records",
+    "medication_administration_log",
+    "restrictive_practices",
+    "risk_assessments",
+    "documents",
+    # Auth
+    "users",
 )
 
 
@@ -42,6 +59,62 @@ DO $$ BEGIN
         CREATE TRIGGER {table}_audit_trigger
         AFTER INSERT OR UPDATE OR DELETE ON {table}
         FOR EACH ROW EXECUTE FUNCTION audit_trigger_func();
+    END IF;
+END $$
+"""
+
+
+PROGRESS_NOTE_IMMUTABILITY_SQL = """
+CREATE OR REPLACE FUNCTION progress_notes_immutability_func()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF TG_OP = 'UPDATE' AND OLD.locked_at IS NOT NULL THEN
+        RAISE EXCEPTION 'progress_notes.id=% is locked at % and cannot be modified; create a corrects_note_id row instead',
+            OLD.id, OLD.locked_at;
+    ELSIF TG_OP = 'DELETE' AND OLD.locked_at IS NOT NULL THEN
+        RAISE EXCEPTION 'progress_notes.id=% is locked at % and cannot be deleted',
+            OLD.id, OLD.locked_at;
+    END IF;
+    IF TG_OP = 'DELETE' THEN
+        RETURN OLD;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql
+"""
+
+PROGRESS_NOTE_IMMUTABILITY_TRIGGER_SQL = """
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'progress_notes_immutability_trigger') THEN
+        CREATE TRIGGER progress_notes_immutability_trigger
+        BEFORE UPDATE OR DELETE ON progress_notes
+        FOR EACH ROW EXECUTE FUNCTION progress_notes_immutability_func();
+    END IF;
+END $$
+"""
+
+MED_ADMIN_IMMUTABILITY_SQL = """
+CREATE OR REPLACE FUNCTION med_admin_immutability_func()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF TG_OP = 'UPDATE' THEN
+        RAISE EXCEPTION 'medication_administration_log rows are immutable (id=%); record a new entry instead',
+            OLD.id;
+    ELSIF TG_OP = 'DELETE' THEN
+        RAISE EXCEPTION 'medication_administration_log rows are immutable (id=%); record a new entry instead',
+            OLD.id;
+    END IF;
+    RETURN NULL;
+END;
+$$ LANGUAGE plpgsql
+"""
+
+MED_ADMIN_IMMUTABILITY_TRIGGER_SQL = """
+DO $$ BEGIN
+    IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname = 'med_admin_immutability_trigger') THEN
+        CREATE TRIGGER med_admin_immutability_trigger
+        BEFORE UPDATE OR DELETE ON medication_administration_log
+        FOR EACH ROW EXECUTE FUNCTION med_admin_immutability_func();
     END IF;
 END $$
 """
@@ -60,6 +133,10 @@ async def init_db(database_url: str) -> None:
             await conn.execute(text(AUDIT_FUNCTION_SQL))
             for table in AUDITED_TABLES:
                 await conn.execute(text(_trigger_sql(table)))
+            await conn.execute(text(PROGRESS_NOTE_IMMUTABILITY_SQL))
+            await conn.execute(text(PROGRESS_NOTE_IMMUTABILITY_TRIGGER_SQL))
+            await conn.execute(text(MED_ADMIN_IMMUTABILITY_SQL))
+            await conn.execute(text(MED_ADMIN_IMMUTABILITY_TRIGGER_SQL))
 
 
 def get_session_factory() -> async_sessionmaker[AsyncSession]:

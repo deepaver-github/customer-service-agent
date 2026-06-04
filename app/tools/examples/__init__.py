@@ -1,3 +1,10 @@
 import app.tools.examples.lookup_participant  # noqa: F401
 import app.tools.examples.get_contacts  # noqa: F401
 import app.tools.examples.search_knowledge  # noqa: F401
+import app.tools.examples.get_active_plan  # noqa: F401
+import app.tools.examples.get_goals  # noqa: F401
+import app.tools.examples.get_upcoming_shifts  # noqa: F401
+import app.tools.examples.get_recent_shifts  # noqa: F401
+import app.tools.examples.get_preferences  # noqa: F401
+import app.tools.examples.get_medications  # noqa: F401
+import app.tools.examples.get_participant_changes  # noqa: F401

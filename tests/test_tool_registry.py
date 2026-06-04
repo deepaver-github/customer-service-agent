@@ -12,6 +12,8 @@ class TestToolRegistry:
         assert "lookup_participant" in names
         assert "get_contacts" in names
         assert "search_knowledge" in names
+        assert "get_active_plan" in names
+        assert "get_goals" in names
         assert "escalate" in names
 
     def test_get_tool_by_name(self):
@@ -188,3 +190,121 @@ class TestParticipantTools:
         titles = [r["title"] for r in result["results"]]
         assert "Supported Independent Living explained" in titles
         assert "Draft article" not in titles
+
+
+class TestPhase2Tools:
+    """Execution tests for plans + goals tools."""
+
+    def test_get_active_plan_requires_participant_id(self):
+        tool = get_tool("get_active_plan")
+        assert "participant_id" in tool.schema["required"]
+
+    def test_get_goals_requires_participant_id(self):
+        tool = get_tool("get_goals")
+        assert "participant_id" in tool.schema["required"]
+
+    async def test_get_active_plan_unknown_participant(self, db):
+        from app.tools.examples.get_active_plan import get_active_plan
+
+        result = await get_active_plan(db=db, participant_id="does-not-exist")
+        assert "error" in result
+
+    async def test_get_active_plan_no_plan(self, db):
+        from app.memory.models import Participant, ParticipantStatus
+        from app.tools.examples.get_active_plan import get_active_plan
+
+        p = Participant(
+            ndis_number="430000010",
+            first_name="No",
+            last_name="Plan",
+            status=ParticipantStatus.ACTIVE,
+        )
+        db.add(p)
+        await db.commit()
+
+        result = await get_active_plan(db=db, participant_id=p.id)
+        assert result["active_plan"] is None
+        assert "No active NDIS plan" in result["message"]
+
+    async def test_get_active_plan_returns_current(self, db):
+        from datetime import date as date_
+        from app.memory.models import (
+            Participant,
+            ParticipantStatus,
+            Plan,
+            PlanManagementType,
+            PlanStatus,
+        )
+        from app.tools.examples.get_active_plan import get_active_plan
+
+        p = Participant(
+            ndis_number="430000011",
+            first_name="Has",
+            last_name="Plan",
+            status=ParticipantStatus.ACTIVE,
+        )
+        db.add(p)
+        await db.commit()
+        db.add(
+            Plan(
+                participant_id=p.id,
+                plan_number="P-TEST-2026",
+                start_date=date_(2026, 1, 1),
+                end_date=date_(2027, 1, 1),
+                management_type=PlanManagementType.SELF,
+                status=PlanStatus.ACTIVE,
+            )
+        )
+        await db.commit()
+
+        result = await get_active_plan(db=db, participant_id=p.id)
+        assert result["active_plan"]["plan_number"] == "P-TEST-2026"
+        assert result["active_plan"]["management_type"] == "self"
+
+    async def test_get_goals_active_only_by_default(self, db):
+        from app.memory.models import (
+            Goal,
+            GoalCategory,
+            GoalStatus,
+            Participant,
+            ParticipantStatus,
+        )
+        from app.tools.examples.get_goals import get_goals
+
+        p = Participant(
+            ndis_number="430000012",
+            first_name="Goal",
+            last_name="Seeker",
+            status=ParticipantStatus.ACTIVE,
+        )
+        db.add(p)
+        await db.commit()
+        db.add(
+            Goal(
+                participant_id=p.id,
+                description="Active goal",
+                category=GoalCategory.INDEPENDENCE,
+                status=GoalStatus.ACTIVE,
+            )
+        )
+        db.add(
+            Goal(
+                participant_id=p.id,
+                description="Achieved goal",
+                category=GoalCategory.COMMUNITY,
+                status=GoalStatus.ACHIEVED,
+            )
+        )
+        await db.commit()
+
+        result = await get_goals(db=db, participant_id=p.id)
+        descriptions = [g["description"] for g in result["goals"]]
+        assert "Active goal" in descriptions
+        assert "Achieved goal" not in descriptions
+
+        result_all = await get_goals(
+            db=db, participant_id=p.id, include_inactive=True
+        )
+        descriptions_all = [g["description"] for g in result_all["goals"]]
+        assert "Active goal" in descriptions_all
+        assert "Achieved goal" in descriptions_all

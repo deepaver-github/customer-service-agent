@@ -11,9 +11,10 @@ from app.api.models import (
     SessionListResponse,
     SessionResponse,
 )
+from app.auth.dependencies import current_user
 from app.memory import repository as repo
 from app.memory.database import get_db
-from app.memory.models import SessionStatus
+from app.memory.models import STAFF_ROLES, SessionStatus, User, UserRole
 
 router = APIRouter()
 
@@ -22,15 +23,30 @@ router = APIRouter()
 async def create_session(
     request: SessionCreate | None = None,
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(current_user),
 ):
     metadata = request.metadata if request else None
     participant_id = request.participant_id if request else None
     staff_id = request.staff_id if request else None
+
+    # Participant users can only create sessions for themselves; staff can
+    # create on behalf of any participant. Auto-fill staff_id from the user
+    # when they're a team member.
+    if user.role == UserRole.PARTICIPANT:
+        if participant_id and participant_id != user.participant_id:
+            raise HTTPException(
+                status_code=403, detail="Participants can only chat about themselves."
+            )
+        participant_id = user.participant_id
+    elif user.role in STAFF_ROLES and staff_id is None and user.staff_id:
+        staff_id = user.staff_id
+
     session = await repo.create_session(
         db,
         metadata=metadata,
         participant_id=participant_id,
         staff_id=staff_id,
+        user_id=user.id,
     )
     return SessionResponse(
         id=session.id,
@@ -48,9 +64,22 @@ async def list_sessions(
     cursor: str | None = Query(default=None),
     limit: int = Query(default=20, ge=1, le=100),
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(current_user),
 ):
+    """Return chat sessions the caller is allowed to see.
+
+    Everyone sees the sessions they created. Admins additionally see any
+    session whose status is ``escalated`` (cross-user oversight) — but only
+    that subset; non-escalated sessions belonging to other users stay hidden.
+    """
     try:
-        items, next_cursor = await repo.list_sessions(db, cursor=cursor, limit=limit)
+        items, next_cursor = await repo.list_sessions(
+            db,
+            cursor=cursor,
+            limit=limit,
+            user_id=user.id,
+            include_escalated=(user.role == UserRole.ADMIN),
+        )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
 
@@ -60,14 +89,25 @@ async def list_sessions(
     )
 
 
+def _can_view_session(user: User, session) -> bool:
+    if session.user_id == user.id:
+        return True
+    if user.role == UserRole.ADMIN and session.status == SessionStatus.ESCALATED:
+        return True
+    return False
+
+
 @router.get("/{session_id}", response_model=SessionDetailResponse)
 async def get_session(
     session_id: str,
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(current_user),
 ):
     session = await repo.get_session(db, session_id)
     if session is None:
         raise HTTPException(status_code=404, detail="Session not found")
+    if not _can_view_session(user, session):
+        raise HTTPException(status_code=403, detail="Not your session.")
 
     messages = [
         MessageResponse(
@@ -95,7 +135,11 @@ async def get_session(
 async def close_session(
     session_id: str,
     db: AsyncSession = Depends(get_db),
+    user: User = Depends(current_user),
 ):
-    session = await repo.update_session_status(db, session_id, SessionStatus.CLOSED)
-    if session is None:
+    existing = await repo.get_session(db, session_id)
+    if existing is None:
         raise HTTPException(status_code=404, detail="Session not found")
+    if existing.user_id != user.id:
+        raise HTTPException(status_code=403, detail="Not your session.")
+    await repo.update_session_status(db, session_id, SessionStatus.CLOSED)

@@ -12,9 +12,14 @@ from app.memory.repository import (
 )
 
 
+# Repo-level test owner. list_sessions requires an explicit scope, so every
+# test in this file stamps and queries against the same synthetic user.
+FAKE_USER_ID = "00000000-0000-0000-0000-000000000001"
+
+
 async def _make_session_at(db, when: datetime):
     """Create a session and force its updated_at to `when` (for deterministic order)."""
-    session = await repo.create_session(db)
+    session = await repo.create_session(db, user_id=FAKE_USER_ID)
     session.updated_at = when
     session.created_at = when
     await db.commit()
@@ -87,13 +92,13 @@ class TestCursorCodec:
 
 class TestListSessions:
     async def test_empty_db(self, db):
-        items, next_cursor = await repo.list_sessions(db)
+        items, next_cursor = await repo.list_sessions(db, user_id=FAKE_USER_ID)
         assert items == []
         assert next_cursor is None
 
     async def test_single_session_no_messages(self, db):
-        session = await repo.create_session(db)
-        items, next_cursor = await repo.list_sessions(db)
+        session = await repo.create_session(db, user_id=FAKE_USER_ID)
+        items, next_cursor = await repo.list_sessions(db, user_id=FAKE_USER_ID)
         assert len(items) == 1
         assert items[0]["id"] == session.id
         assert items[0]["status"] == "active"
@@ -107,29 +112,29 @@ class TestListSessions:
         s_mid = await _make_session_at(db, base + timedelta(minutes=10))
         s_new = await _make_session_at(db, base + timedelta(minutes=20))
 
-        items, _ = await repo.list_sessions(db)
+        items, _ = await repo.list_sessions(db, user_id=FAKE_USER_ID)
         ids = [item["id"] for item in items]
         assert ids == [s_new.id, s_mid.id, s_old.id]
 
     async def test_preview_uses_latest_user_or_assistant_message(self, db):
-        session = await repo.create_session(db)
+        session = await repo.create_session(db, user_id=FAKE_USER_ID)
         await repo.add_message(db, session.id, "user", "First user message")
         await repo.add_message(db, session.id, "assistant", "Assistant reply")
         await repo.add_message(db, session.id, "tool", [{"type": "tool_result", "content": "ok"}])
 
-        items, _ = await repo.list_sessions(db)
+        items, _ = await repo.list_sessions(db, user_id=FAKE_USER_ID)
         assert items[0]["last_message_preview"] == "Assistant reply"
         assert items[0]["message_count"] == 3
 
     async def test_preview_handles_structured_content(self, db):
-        session = await repo.create_session(db)
+        session = await repo.create_session(db, user_id=FAKE_USER_ID)
         await repo.add_message(
             db,
             session.id,
             "assistant",
             [{"type": "text", "text": "Found participant."}, {"type": "tool_use", "name": "lookup_participant"}],
         )
-        items, _ = await repo.list_sessions(db)
+        items, _ = await repo.list_sessions(db, user_id=FAKE_USER_ID)
         assert items[0]["last_message_preview"] == "Found participant. [used lookup_participant]"
 
     async def test_pagination_round_trip(self, db):
@@ -140,27 +145,51 @@ class TestListSessions:
         ]
         expected_order = [s.id for s in reversed(created)]
 
-        page1, cursor1 = await repo.list_sessions(db, limit=2)
+        page1, cursor1 = await repo.list_sessions(db, user_id=FAKE_USER_ID, limit=2)
         assert [it["id"] for it in page1] == expected_order[:2]
         assert cursor1 is not None
 
-        page2, cursor2 = await repo.list_sessions(db, cursor=cursor1, limit=2)
+        page2, cursor2 = await repo.list_sessions(db, user_id=FAKE_USER_ID, cursor=cursor1, limit=2)
         assert [it["id"] for it in page2] == expected_order[2:4]
         assert cursor2 is not None
 
-        page3, cursor3 = await repo.list_sessions(db, cursor=cursor2, limit=2)
+        page3, cursor3 = await repo.list_sessions(db, user_id=FAKE_USER_ID, cursor=cursor2, limit=2)
         assert [it["id"] for it in page3] == expected_order[4:]
         assert cursor3 is None
 
     async def test_invalid_cursor_raises_value_error(self, db):
         with pytest.raises(ValueError):
-            await repo.list_sessions(db, cursor="garbage")
+            await repo.list_sessions(db, user_id=FAKE_USER_ID, cursor="garbage")
+
+    async def test_scope_filters_to_owner(self, db):
+        other = "00000000-0000-0000-0000-000000000099"
+        mine = await repo.create_session(db, user_id=FAKE_USER_ID)
+        await repo.create_session(db, user_id=other)
+        items, _ = await repo.list_sessions(db, user_id=FAKE_USER_ID)
+        assert [i["id"] for i in items] == [mine.id]
+
+    async def test_admin_view_includes_escalated_across_users(self, db):
+        from app.memory.models import SessionStatus
+        other = "00000000-0000-0000-0000-000000000099"
+        mine = await repo.create_session(db, user_id=FAKE_USER_ID)
+        other_escalated = await repo.create_session(db, user_id=other)
+        await repo.update_session_status(db, other_escalated.id, SessionStatus.ESCALATED)
+        # Other private (non-escalated) session must not leak in.
+        await repo.create_session(db, user_id=other)
+
+        items, _ = await repo.list_sessions(
+            db, user_id=FAKE_USER_ID, include_escalated=True
+        )
+        returned = {i["id"] for i in items}
+        assert mine.id in returned
+        assert other_escalated.id in returned
+        assert len(returned) == 2
 
     async def test_no_n_plus_one(self, db, monkeypatch):
         """Sanity check: listing N sessions should run exactly one execute() call."""
         # 5 sessions with messages
         for _ in range(5):
-            session = await repo.create_session(db)
+            session = await repo.create_session(db, user_id=FAKE_USER_ID)
             await repo.add_message(db, session.id, "user", "hello")
 
         from sqlalchemy.ext.asyncio import AsyncSession as RealAsyncSession
@@ -174,6 +203,6 @@ class TestListSessions:
 
         monkeypatch.setattr(RealAsyncSession, "execute", counting_execute)
 
-        items, _ = await repo.list_sessions(db, limit=20)
+        items, _ = await repo.list_sessions(db, user_id=FAKE_USER_ID, limit=20)
         assert len(items) == 5
         assert call_count["n"] == 1, f"expected 1 query, got {call_count['n']} (N+1 regression)"
