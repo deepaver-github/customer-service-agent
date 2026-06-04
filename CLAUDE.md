@@ -75,7 +75,8 @@ frontend/
       auth.store.ts    # Signal-based auth + localStorage persistence (signIn, signOut, tokenSnapshot)
       auth.interceptor.ts  # Attaches Bearer token; 401 → clear + redirect to /login
       auth.guard.ts    # authGuard (requires login) + loginGuard (redirects authed users away from /login)
-      chat.store.ts    # Signal-based store (sessions, turns, isStreaming, isEscalated)
+      layout.store.ts  # Signal store for mobile nav drawer (navOpen + open/close/toggle; auto-closes on NavigationEnd)
+      chat.store.ts    # Signal-based store (sessions, turns, isStreaming, isEscalated, chatListOpen mobile sheet)
       chat.service.ts  # SSE streamMessage via fetchEventSource + AbortController (manually attaches Bearer)
       session.service.ts
       participant.service.ts  # list/get/create/update/dashboardStats/staff/knowledge
@@ -282,11 +283,11 @@ Anyone cloning fresh needs `cd frontend && npm ci && npm run build` before `uvic
 - **Dashboard search wired** — header search submits Enter to `/participants?search=…`; `participant-list` hydrates `search` / `status` signals from `queryParamMap` on init.
 - **Alembic baseline** — `alembic.ini` + `alembic/env.py` + no-op `0001_baseline`. Schema-changes can switch to `alembic revision --autogenerate` once real data lands.
 - **Deployed on Railway** — service `web` (project `magnificent-happiness`) auto-deploys from GitHub `main`, builds the `Dockerfile`, runs against a Railway Postgres. Live at https://specialcareaustralia.up.railway.app. Config-as-code lives in `railway.toml`.
+- **Mobile responsive layout** — the SPA adapts cleanly below Tailwind's `md` (768px) breakpoint; desktop layout is unchanged at ≥768px. A `LayoutStore` (`services/layout.store.ts`) drives an off-canvas nav drawer (hamburger in a `md:hidden` top bar in `admin-shell`, backdrop scrim, auto-closes on `NavigationEnd`); the chat conversation list is a matching slide-in sheet driven by `chat.store.ts` `chatListOpen` (opened by a `md:hidden` "Conversations" button in `chat-view`). Data tables become labelled stacked cards via the `.stack-table` + `data-label` CSS pattern in `styles.css`; page gutters, grids, detail tabs (scrollable strip + `.no-scrollbar`), and filter chips all collapse responsively.
 
 ## What's Not Done Yet
 
 - **Coming Soon SPA features** — these affordances are explicitly disabled in the UI with "Soon" badges so they don't read as broken: sidebar Plans & Goals / Staff / Knowledge base pages, participant detail `+ Add goal`, chat composer attach-file. Sequencing plan: `C:\Users\deepa\.claude\plans\sca-coming-soon-plan.md` (Phase A=goal CRUD → B=Plans/Goals page → C=Staff page → D=Knowledge base → E=attachments).
-- **Mobile responsive layout** — sidebar is `hidden md:flex`, no mobile drawer. The chat-view mobile hamburger was removed because it had no destination; reinstate when there's a real drawer.
 - **Switch from `create_all` to `alembic upgrade head` on startup** — baseline is in place; flip the switch once real data lands.
 - **Rotate the seed password** before any real participant data lands; `ChangeMe!2026` is in source.
 - **Audit-log attribution to current user** — we know *what* changed, not *who*. Needs `SET LOCAL "app.user_id" = ...` per request (from `current_user` dep) so triggers can stamp `changed_by`.
