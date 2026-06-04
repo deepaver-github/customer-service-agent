@@ -3,6 +3,13 @@ builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
 
 [deploy]
+# Runs in a one-off container before the new release goes live. Idempotent:
+# seed() creates tables/triggers and skips inserts if already seeded.
+preDeployCommand = "python -m app.memory.seed"
+# Wrapped in a shell so ${PORT} (injected by Railway) is expanded. Dockerfile
+# deploys run the start command in exec form, which does NOT interpret shell
+# syntax — without `sh -c` the variable and any operators are passed literally.
+startCommand = "/bin/sh -c 'uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8001}'"
 healthcheckPath = "/health"
 healthcheckTimeout = 100
 restartPolicyType = "ON_FAILURE"
