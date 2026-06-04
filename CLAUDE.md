@@ -203,6 +203,7 @@ All tools take `db: AsyncSession` (injected by `tool_executor.py`), return plain
 - **Role-scope at the route layer, not via middleware** — each route declares `Depends(current_user)` or `Depends(current_staff)`; participant-vs-self scoping uses `participant_can_access()` inside the route. Easier to reason about than blanket middleware, easier to override in tests (chat-API tests override `current_user` to a fake staff user, avoiding token threading).
 - **Single-origin SPA + API + SPA fallback** — Angular builds into `app/static/`, FastAPI serves it via `SPAStaticFiles` mounted at `/`. A custom Starlette exception handler catches 401/404/405 on browser navigations and returns `index.html` so Angular's router can render `/login`, `/participants/:id`, etc. on direct visits. XHR clients still get proper JSON error bodies. CORS allows `http://localhost:4200` for dev (Angular dev server).
 - **Single deployment** — not multi-tenant. Branding (logo, colors, agent personality) is hardcoded for SCA.
+- **Railway start command runs in exec form** — for Dockerfile deploys, a custom `startCommand` is NOT shell-interpreted, so `&&` and `${PORT}` are passed literally. Seed via `railway.toml` `preDeployCommand`; wrap the run command as `/bin/sh -c 'uvicorn … --port ${PORT:-8001}'`. (The `Dockerfile` `CMD` is shell-form, so it expands `${PORT}` fine on its own.)
 
 ## Brand & Visual Identity
 
@@ -280,6 +281,7 @@ Anyone cloning fresh needs `cd frontend && npm ci && npm run build` before `uvic
 - **SPA fallback** — direct-URL navigation to client-side routes works (`/login`, `/participants/:id`, etc.), while XHR clients still get proper JSON errors.
 - **Dashboard search wired** — header search submits Enter to `/participants?search=…`; `participant-list` hydrates `search` / `status` signals from `queryParamMap` on init.
 - **Alembic baseline** — `alembic.ini` + `alembic/env.py` + no-op `0001_baseline`. Schema-changes can switch to `alembic revision --autogenerate` once real data lands.
+- **Deployed on Railway** — service `web` (project `magnificent-happiness`) auto-deploys from GitHub `main`, builds the `Dockerfile`, runs against a Railway Postgres. Live at https://specialcareaustralia.up.railway.app. Config-as-code lives in `railway.toml`.
 
 ## What's Not Done Yet
 
@@ -291,5 +293,5 @@ Anyone cloning fresh needs `cd frontend && npm ci && npm run build` before `uvic
 - **Rate-limiting `/auth/login`** — a single FastAPI middleware would do it; no production deploy should ship without this.
 - **Password reset / MFA / SSO** — none of these are in place. SSO for staff (Microsoft/Google) is likely the highest-leverage next step.
 - **Document storage backend** — `documents.storage_url` (Phase 4) is a string pointer; S3/blob wiring is a separate decision.
-- **Production deployment config** — single-origin static mount is solid, but no Dockerfile for the app itself, no env-var injection beyond `.env`, no health-check probe wiring, no CSRF posture documented.
+- **Deployment hardening** — Dockerfile + `railway.toml` + `/health` probe are live on Railway. Still open: no CSRF posture documented, secrets only via Railway env vars, and a stale *dashboard-level* Custom Start Command override still shadows `railway.toml` (clear it so `railway.toml` is the single source of truth). The root `Procfile` is dead config for Dockerfile builds.
 - **NDIS portal integration / claim generation** — explicitly out of scope (handled by external billing software).
