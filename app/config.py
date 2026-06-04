@@ -4,9 +4,36 @@ import yaml
 from functools import lru_cache
 from pathlib import Path
 from typing import Any
+from urllib.parse import quote
 
 from pydantic_settings import BaseSettings
 from pydantic import Field, field_validator
+
+
+def _encode_userinfo(url: str) -> str:
+    """URL-encode the user:password portion of a postgres URL. Railway's
+    auto-generated passwords often contain unescaped @ / : % which break
+    SQLAlchemy's URL parser. Uses the LAST @ as the userinfo/host boundary,
+    so passwords containing @ are handled correctly."""
+    scheme, sep, rest = url.partition("://")
+    if not sep or "@" not in rest:
+        return url
+    userinfo, _, hostpart = rest.rpartition("@")
+    if ":" not in userinfo:
+        return url
+    user, _, password = userinfo.partition(":")
+    return f"{scheme}://{quote(user, safe='')}:{quote(password, safe='')}@{hostpart}"
+
+
+def _sanitize_for_log(url: str) -> str:
+    scheme, sep, rest = url.partition("://")
+    if not sep or "@" not in rest:
+        return url
+    userinfo, _, hostpart = rest.rpartition("@")
+    if ":" in userinfo:
+        user, _, _ = userinfo.partition(":")
+        return f"{scheme}://{user}:***@{hostpart}"
+    return f"{scheme}://***@{hostpart}"
 
 
 class Settings(BaseSettings):
@@ -31,6 +58,11 @@ class Settings(BaseSettings):
         # asyncpg doesn't understand libpq's sslmode= param; strip/translate it.
         if "sslmode=" in v:
             v = v.replace("sslmode=require", "ssl=true").replace("sslmode=", "ssl=")
+        # Re-encode user:password — Railway's auto-generated passwords often
+        # contain @ / : % which SQLAlchemy can't parse unless they're encoded.
+        if v.startswith("postgresql+asyncpg://"):
+            v = _encode_userinfo(v)
+        print(f"[config] DATABASE_URL resolved to: {_sanitize_for_log(v)}", flush=True)
         return v
     escalation_webhook_url: str | None = Field(
         default=None, alias="ESCALATION_WEBHOOK_URL"
