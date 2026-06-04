@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { Router, RouterLink } from '@angular/router';
 import { ParticipantDetail } from '../../models/participant.model';
 import { ParticipantService } from '../../services/participant.service';
@@ -595,6 +596,12 @@ type Tab = 'overview' | 'contacts' | 'plan' | 'services' | 'clinical' | 'history
               </div>
             }
           }
+        } @else if (error(); as e) {
+          <div class="mx-auto mt-10 max-w-xl rounded-xl border border-escalation-text/30 bg-escalation-bg/40 px-5 py-6 text-center">
+            <h3 class="mb-1 font-display text-[15px] font-semibold text-escalation-text">Couldn't load participant</h3>
+            <p class="text-[13px] text-ink-700">{{ e }}</p>
+            <p class="mt-3 text-[12px] text-ink-500">ID: <code class="font-mono">{{ id() }}</code></p>
+          </div>
         } @else {
           <div class="py-10 text-center text-[13px] text-ink-500">Loading…</div>
         }
@@ -609,6 +616,7 @@ export class ParticipantDetailComponent implements OnInit {
 
   readonly id = input.required<string>();
   readonly data = signal<ParticipantDetail | null>(null);
+  readonly error = signal<string | null>(null);
   readonly tab = signal<Tab>('overview');
 
   readonly tabList = computed(() => {
@@ -648,7 +656,15 @@ export class ParticipantDetailComponent implements OnInit {
     try {
       const detail = await this.participants.get(this.id());
       this.data.set(detail);
-    } catch {
+    } catch (err) {
+      console.error('participant-detail load failed', err);
+      const msg =
+        err instanceof HttpErrorResponse
+          ? `${err.status} ${err.statusText || ''} — ${
+              (err.error && (err.error.detail || err.error.message)) || err.message
+            }`
+          : (err as Error)?.message ?? 'Unknown error';
+      this.error.set(msg);
       this.data.set(null);
     }
   }
